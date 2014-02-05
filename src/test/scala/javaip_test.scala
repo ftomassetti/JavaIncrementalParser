@@ -1,7 +1,7 @@
 package codemodels.incrementalparsers.javaip
 
 import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
-  Contextualizer}
+  Contextualizer, Token}
 import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule
 import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
@@ -13,25 +13,23 @@ abstract class UnitSpec extends FlatSpec with Matchers with
 
 class MySpec extends UnitSpec {
 
+  private def check_token(kind:String,value:String,token:Token) : Unit = {
+    assert(kind==token.kind)
+    assert(value==token.value)
+  }
+
   it should "parse a basic class" in {
     val code = "class A { }"
     val lexer = JavaIP.tokenizer
-    val tokens = lexer.tokenize(code)
+    val tokens = lexer.tokenize(code)    
     assert(7==tokens.length)
-    assert("class"==tokens(0).kind)
-    assert("class"==tokens(0).value)
-    assert("whitespace"==tokens(1).kind)
-    assert(" "==tokens(1).value)
-    assert("identifier"==tokens(2).kind)
-    assert("A"==tokens(2).value)
-    assert("whitespace"==tokens(3).kind)
-    assert(" "==tokens(3).value)
-    assert("{"==tokens(4).kind)
-    assert("{"==tokens(4).value)
-    assert("whitespace"==tokens(5).kind)
-    assert(" "==tokens(5).value)
-    assert("}"==tokens(6).kind)
-    assert("}"==tokens(6).value)
+    check_token("class","class",tokens(0))
+    check_token("whitespace"," ",tokens(1))
+    check_token("identifier","A",tokens(2))
+    check_token("whitespace"," ",tokens(3))
+    check_token("{","{",tokens(4))
+    check_token("whitespace"," ",tokens(5))
+    check_token("}","}",tokens(6))
   }
 
 }

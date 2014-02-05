@@ -1,7 +1,7 @@
 package codemodels.incrementalparsers.javaip
 
 import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
-  Contextualizer}
+  Contextualizer, Token}
 import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule
 import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
