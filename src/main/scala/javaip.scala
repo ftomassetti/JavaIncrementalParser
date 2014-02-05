@@ -21,7 +21,7 @@ object JavaIP {
     ).skip
 
     tokenCategory(
-      "number",
+      "integer",
       choice(  // in terms of regexp: 0|([1-9][0-9]*)
         chunk("0"),
         sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))

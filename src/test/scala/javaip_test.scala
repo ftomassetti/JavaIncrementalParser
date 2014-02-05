@@ -51,4 +51,33 @@ class MySpec extends UnitSpec {
     check_token("}","}",tokens(11))
   }  
 
+  it should "parse a method definition" in {
+    val code = "class A {void foo(int a){return 1+2;}}"
+    val lexer = JavaIP.tokenizer
+    val tokens = lexer.tokenize(code)  
+    assert(22==tokens.length)
+    check_token("class","class",tokens(0))
+    check_token("whitespace"," ",tokens(1))
+    check_token("identifier","A",tokens(2))
+    check_token("whitespace"," ",tokens(3))
+    check_token("{","{",tokens(4))
+    check_token("void","void",tokens(5))
+    check_token("whitespace"," ",tokens(6))
+    check_token("identifier","foo",tokens(7))
+    check_token("(","(",tokens(8))
+    check_token("int","int",tokens(9))
+    check_token("whitespace"," ",tokens(10))
+    check_token("identifier","a",tokens(11))
+    check_token(")",")",tokens(12))
+    check_token("{","{",tokens(13))
+    check_token("return","return",tokens(14))
+    check_token("whitespace"," ",tokens(15))
+    check_token("integer","1",tokens(16))
+    check_token("+","+",tokens(17))
+    check_token("integer","2",tokens(18))
+    check_token(";",";",tokens(19))
+    check_token("}","}",tokens(20))
+    check_token("}","}",tokens(21))
+  }  
+
 }
