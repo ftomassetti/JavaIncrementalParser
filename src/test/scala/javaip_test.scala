@@ -14,8 +14,8 @@ abstract class UnitSpec extends FlatSpec with Matchers with
 class MySpec extends UnitSpec {
 
   private def check_token(kind:String,value:String,token:Token) : Unit = {
-    assert(kind==token.kind)
-    assert(value==token.value)
+    assert(kind==token.kind,"kind is wrong")
+    assert(value==token.value,"value is wrong")
   }
 
   it should "parse a basic class" in {
@@ -31,5 +31,24 @@ class MySpec extends UnitSpec {
     check_token("whitespace"," ",tokens(5))
     check_token("}","}",tokens(6))
   }
+
+  it should "parse a field definition" in {
+    val code = "class A {int[] bits;}"
+    val lexer = JavaIP.tokenizer
+    val tokens = lexer.tokenize(code)  
+    assert(12==tokens.length)
+    check_token("class","class",tokens(0))
+    check_token("whitespace"," ",tokens(1))
+    check_token("identifier","A",tokens(2))
+    check_token("whitespace"," ",tokens(3))
+    check_token("{","{",tokens(4))
+    check_token("int","int",tokens(5))
+    check_token("[","[",tokens(6))
+    check_token("]","]",tokens(7))
+    check_token("whitespace"," ",tokens(8))
+    check_token("identifier","bits",tokens(9))
+    check_token(";",";",tokens(10))
+    check_token("}","}",tokens(11))
+  }  
 
 }
