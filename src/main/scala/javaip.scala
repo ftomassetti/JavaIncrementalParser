@@ -7,13 +7,47 @@ import name.lakhin.eliah.projects.papacarlo.syntax.Rule
 import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
 
 object JavaIP {
-  private def tokenizer = {
+  def tokenizer = {
     val tokenizer = new Tokenizer()
 
     import tokenizer._
     import Matcher._
 
     // lexis specification here
+
+    tokenCategory(
+      "whitespace",
+      oneOrMore(anyOf(" \t\f\n")) // in terms of regexp: [:space:]+
+    ).skip
+
+    tokenCategory(
+      "number",
+      choice(  // in terms of regexp: 0|([1-9][0-9]*)
+        chunk("0"),
+        sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))
+      )
+    )
+
+    tokenCategory(
+      "identifier",
+      sequence(
+        choice(chunk("_"),rangeOf('a', 'z'),rangeOf('A','Z')),
+        zeroOrMore(
+          choice(
+            chunk("_"),
+            rangeOf('a', 'z'),
+            rangeOf('A','Z'),
+            rangeOf('0', '9'))))
+    )
+
+    terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",
+      "&&","||","+=","-=","*=","/=","&","|")
+
+    keywords("true", "false", "null", 
+      "byte","int", "char", "short", "long", "float", "double", "void",
+      "do", "while", "for", "switch", "case", "break", "return",
+      "class","private","protected","public","static","native",
+      "synchronized")
 
     tokenizer
   }
