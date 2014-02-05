@@ -11,7 +11,7 @@ import org.scalatest._
 abstract class UnitSpec extends FlatSpec with Matchers with
   OptionValues with Inside with Inspectors
 
-class MySpec extends UnitSpec {
+class TokenizerSpec extends UnitSpec {
 
   private def check_token(kind:String,value:String,token:Token) : Unit = {
     assert(kind==token.kind,"kind is wrong")
@@ -79,5 +79,17 @@ class MySpec extends UnitSpec {
     check_token("}","}",tokens(20))
     check_token("}","}",tokens(21))
   }  
+
+}
+
+class ParserSpec extends UnitSpec {
+
+  it should "parse a basic class" in {
+    val code = "class A { }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    syntax.onNodeMerge.bind {node => println(node.prettyPrint())}
+    lexer.input(code)
+  }
 
 }

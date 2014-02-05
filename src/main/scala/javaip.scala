@@ -58,6 +58,10 @@ object JavaIP {
     import contextualizer._
 
     // fragment specification here
+    trackContext("[", "]").allowCaching
+    trackContext("{", "}").allowCaching
+    trackContext("/*", "*/").forceSkip.topContext
+    trackContext("&quot;", "&quot;").topContext
 
     contextualizer
   }
@@ -70,7 +74,17 @@ object JavaIP {
     import syntax._
     import Rule._
 
-    // syntax rule specification here
+    val javaClass = mainRule("class") {
+      // Consists of three sequential parts: "[" token, series of nested
+      // elements separated with "," token, and losing "]" token.
+      sequence(
+        token("class"),
+        token("identifier"),
+        token("{"),
+        token("}"),
+        recover(token("}"), "class must end with '}'")
+      )
+    }
 
   }.syntax
 }
