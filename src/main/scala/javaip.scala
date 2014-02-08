@@ -4,6 +4,7 @@ import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
   Contextualizer, Token}
 import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule
+import name.lakhin.eliah.projects.papacarlo.syntax.NodeAccessor
 import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
 
 object JavaIP {
@@ -84,6 +85,13 @@ object JavaIP {
         token("}"),
         recover(token("}"), "class must end with '}'")
       )
+    }
+
+    intercept(javaClass){
+      node => 
+        val accessor = new NodeAccessor(node)
+        println("ENTRY NODE "+node.getKind)
+        node
     }
 
   }.syntax
