@@ -80,18 +80,11 @@ object JavaIP {
       // elements separated with "," token, and losing "]" token.
       sequence(
         token("class"),
-        token("identifier"),
+        capture("name", token("identifier")),
         token("{"),
         token("}"),
         recover(token("}"), "class must end with '}'")
       )
-    }
-
-    intercept(javaClass){
-      node => 
-        val accessor = new NodeAccessor(node)
-        println("ENTRY NODE "+node.getKind)
-        node
     }
 
   }.syntax

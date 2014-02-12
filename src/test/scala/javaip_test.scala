@@ -5,6 +5,7 @@ import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
 import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule
 import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
+import scala.collection.mutable
 
 import org.scalatest._
 
@@ -88,8 +89,14 @@ class ParserSpec extends UnitSpec {
     val code = "class A { }"
     val lexer = JavaIP.lexer
     val syntax = JavaIP.syntax(lexer)
-    syntax.onNodeMerge.bind {node => println(node.prettyPrint())}
+    var classes = List[String]()
+    syntax.onNodeMerge.bind {node => {
+      classes ::= node.getValue("name")
+    }}
     lexer.input(code)
+
+    assert(1==classes.size)
+    assert("A"==classes.head)
   }
 
 }
