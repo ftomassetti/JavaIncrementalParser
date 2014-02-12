@@ -42,13 +42,17 @@ object JavaIP {
     )
 
     terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",
-      "&&","||","+=","-=","*=","/=","&","|","[","]")
+      "&&","||","+=","-=","*=","/=","&","|","[","]",
+      "//","/*","*/")
 
-    keywords("true", "false", "null", 
+    keywords(
+      "true", "false",
+      "null",
       "byte","int", "char", "short", "long", "float", "double", "void",
       "do", "while", "for", "switch", "case", "break", "return",
-      "class","private","protected","public","static","native",
-      "synchronized")
+      "class",
+      "private","protected","public",
+      "static","native","final", "synchronized")
 
     tokenizer
   }
@@ -59,10 +63,11 @@ object JavaIP {
     import contextualizer._
 
     // fragment specification here
-    trackContext("[", "]").allowCaching
+    //trackContext("[", "]").allowCaching
     trackContext("{", "}").allowCaching
     trackContext("/*", "*/").forceSkip.topContext
-    trackContext("&quot;", "&quot;").topContext
+    trackContext("//", Token.LineBreakKind).forceSkip.topContext
+    //trackContext("&quot;", "&quot;").topContext
 
     contextualizer
   }
@@ -75,10 +80,27 @@ object JavaIP {
     import syntax._
     import Rule._
 
+    val accessQualifier = rule("accessQualifier") {
+      choice(
+        capture("public",token("public")),
+        capture("protected",token("protected")),
+        capture("private",token("private"))
+      )
+    }
+
+    val qualifier = rule("qualifier") {
+      choice(
+        branch("access", accessQualifier),
+        capture("static", token("static")),
+        capture("final", token("final"))
+      )
+    }
+
     val javaClass = mainRule("class") {
       // Consists of three sequential parts: "[" token, series of nested
       // elements separated with "," token, and losing "]" token.
       sequence(
+        optional(branch("qualifiers",zeroOrMore(qualifier))),
         token("class"),
         capture("name", token("identifier")),
         token("{"),

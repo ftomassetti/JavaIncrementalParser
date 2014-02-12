@@ -4,6 +4,7 @@ import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
   Contextualizer, Token}
 import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule
+import name.lakhin.eliah.projects.papacarlo.syntax.Node
 import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
 import scala.collection.mutable
 
@@ -97,6 +98,25 @@ class ParserSpec extends UnitSpec {
 
     assert(1==classes.size)
     assert("A"==classes.head)
+  }
+
+  it should "parse a basic class with qualifiers" in {
+    val code = "public static class A { }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var classes = Map[String,Node]()
+    syntax.onNodeMerge.bind {node => {
+      classes += (node.getValue("name") -> node)
+    }}
+    lexer.input(code)
+
+    assert(1==classes.size)
+    assert(classes contains "A")
+    assert(2==classes.get("A").get.getBranches("qualifiers").size)
+    assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
+    assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("public")).size)
+    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("protected")).size)
+    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
   }
 
 }
