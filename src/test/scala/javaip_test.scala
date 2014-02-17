@@ -92,7 +92,8 @@ class ParserSpec extends UnitSpec {
     val syntax = JavaIP.syntax(lexer)
     var classes = List[String]()
     syntax.onNodeMerge.bind {node => {
-      classes ::= node.getValue("name")
+      val classNode = node.getBranch("classDeclaration").get
+      classes ::= classNode.getValue("name")
     }}
     lexer.input(code)
 
@@ -106,7 +107,8 @@ class ParserSpec extends UnitSpec {
     val syntax = JavaIP.syntax(lexer)
     var classes = Map[String,Node]()
     syntax.onNodeMerge.bind {node => {
-      classes += (node.getValue("name") -> node)
+      val classNode = node.getBranch("classDeclaration").get
+      classes += (classNode.getValue("name") -> classNode)
     }}
     lexer.input(code)
 
@@ -115,6 +117,37 @@ class ParserSpec extends UnitSpec {
     assert(2==classes.get("A").get.getBranches("qualifiers").size)
     assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
     assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("public")).size)
+    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("protected")).size)
+    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
+  }
+
+  it should "parse import directives" in {
+    val code = "import java.applet.*;\n" +
+               "import java.awt.*;\n"+
+               "class A { }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var classes = Map[String,Node]()
+    var imports = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      imports = node.getBranches("imports")
+      val classNode = node.getBranch("classDeclaration").get
+      classes += (classNode.getValue("name") -> classNode)
+    }}
+    lexer.input(code)
+
+    assert(2==imports.size)
+    var import1 = imports.head
+    var import2 = imports.tail.head
+
+    assert(List("java","applet","*")==import1.getValues("part").reverse)
+    assert(List("java","awt","*")==import2.getValues("part").reverse)
+
+    assert(1==classes.size)
+    assert(classes contains "A")
+    assert(0==classes.get("A").get.getBranches("qualifiers").size)
+    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
+    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("public")).size)
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("protected")).size)
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
   }

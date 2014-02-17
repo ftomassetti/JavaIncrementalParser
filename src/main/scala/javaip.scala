@@ -41,7 +41,7 @@ object JavaIP {
             rangeOf('0', '9'))))
     )
 
-    terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",
+    terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",".",
       "&&","||","+=","-=","*=","/=","&","|","[","]",
       "//","/*","*/")
 
@@ -50,7 +50,8 @@ object JavaIP {
       "null",
       "byte","int", "char", "short", "long", "float", "double", "void",
       "do", "while", "for", "switch", "case", "break", "return",
-      "class",
+      "import",
+      "class","interface",
       "private","protected","public",
       "static","native","final", "synchronized")
 
@@ -96,7 +97,7 @@ object JavaIP {
       )
     }
 
-    val javaClass = mainRule("class") {
+    val javaClass = rule("class") {
       // Consists of three sequential parts: "[" token, series of nested
       // elements separated with "," token, and losing "]" token.
       sequence(
@@ -106,6 +107,30 @@ object JavaIP {
         token("{"),
         token("}"),
         recover(token("}"), "class must end with '}'")
+      )
+    }
+
+    val importDir = rule("importDir") {
+      sequence(
+        token("import"),
+        capture("part",token("identifier")),
+        zeroOrMore(
+          sequence(
+            token("."),
+            choice(
+              capture("part",token("identifier")),
+              capture("part",token("*"))
+            )
+          )
+        ),
+        token(";").permissive
+      )
+    }
+
+    val compilationUnit = rule("compilationUnit").main {
+      sequence(
+        branch("imports",zeroOrMore(importDir)),
+        branch("classDeclaration",javaClass)
       )
     }
 
