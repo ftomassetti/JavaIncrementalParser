@@ -141,7 +141,6 @@ class ParserSpec extends UnitSpec {
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
   }
 
-
   it should "parse import directives" in {
     val code = "import java.applet.*;\n" +
                "import java.awt.*;\n"+
@@ -171,6 +170,27 @@ class ParserSpec extends UnitSpec {
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("public")).size)
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("protected")).size)
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
+  }
+
+  it should "parse a method declaration" in {
+    val code = "class A { void foo(){} }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var methods = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      val members = node.getBranch("classDeclaration").get.getBranches("members")
+      methods = members
+    }}
+    lexer.input(code)
+
+    assert(1==methods.size)
+    val m = methods.head
+    println("m "+m)
+    println("name "+m.getValue("name"))
+    println("m text '"+m.sourceCode+"'")
+    assert("void foo(){}"==m.sourceCode)
+    //println("ret "+m.getValue("returnType"))
+    //assert("void"==m.getValue("returnType"))
   }
 
 }

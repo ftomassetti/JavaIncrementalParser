@@ -6,6 +6,7 @@ import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule
 import name.lakhin.eliah.projects.papacarlo.syntax.NodeAccessor
 import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
+import name.lakhin.eliah.projects.papacarlo.syntax.Rule._
 
 object JavaIP {
   def tokenizer = {
@@ -97,14 +98,57 @@ object JavaIP {
       )
     }
 
+    val typeUsage = rule("typeUsage") {
+      sequence(
+        capture("name",token("identifier"))
+      )
+    }
+
+    val fieldDecl = rule("fieldDecl") {
+      sequence(
+        branch("qualifiers",zeroOrMore(qualifier)),
+        branch("type",typeUsage),
+        capture("name", token("identifier")),
+        token(";").permissive
+      )
+    }
+
+    val methodDecl = rule("methodDecl") {
+      sequence(
+        branch("qualifiers",zeroOrMore(qualifier)),
+        /*choice(
+          branch("returnType",typeUsage),
+          branch("returnType",token("void"))
+        ),*/
+        //capture("returnType",token("void")),
+        branch("returnType",
+          choice(
+            typeUsage,
+            token("void")
+          )
+        ),
+        capture("name", token("identifier")),
+        token("("),
+        token(")"),
+        token("{"),
+        token("}"),
+        optional(token(";"))
+      )
+    }
+
+    val memberDecl = rule("memberDecl") {
+      choice(fieldDecl, methodDecl)
+    }
+
     val javaClass = rule("class") {
       // Consists of three sequential parts: "[" token, series of nested
       // elements separated with "," token, and losing "]" token.
       sequence(
-        optional(branch("qualifiers",zeroOrMore(qualifier))),
+        branch("qualifiers",zeroOrMore(qualifier)),
         token("class"),
         capture("name", token("identifier")),
         token("{"),
+        branch("members",zeroOrMore(memberDecl)),
         token("}"),
         recover(token("}"), "class must end with '}'")
       )
