@@ -121,6 +121,27 @@ class ParserSpec extends UnitSpec {
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
   }
 
+  it should "parse a basic class with comments" in {
+    val code = "public /*ciao*/ static // hey! \n class /*come va?*/ A // last comment\n{ }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var classes = Map[String,Node]()
+    syntax.onNodeMerge.bind {node => {
+      val classNode = node.getBranch("classDeclaration").get
+      classes += (classNode.getValue("name") -> classNode)
+    }}
+    lexer.input(code)
+
+    assert(1==classes.size)
+    assert(classes contains "A")
+    assert(2==classes.get("A").get.getBranches("qualifiers").size)
+    assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
+    assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("public")).size)
+    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("protected")).size)
+    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
+  }
+
+
   it should "parse import directives" in {
     val code = "import java.applet.*;\n" +
                "import java.awt.*;\n"+
