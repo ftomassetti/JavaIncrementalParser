@@ -185,12 +185,8 @@ class ParserSpec extends UnitSpec {
 
     assert(1==methods.size)
     val m = methods.head
-    println("m "+m)
-    println("name "+m.getValue("name"))
-    println("m text '"+m.sourceCode+"'")
-    assert("void foo(){}"==m.sourceCode)
-    //println("ret "+m.getValue("returnType"))
-    //assert("void"==m.getValue("returnType"))
+    assert("foo"==m.getBranch("member").get.getValue("name"))
+    assert("voidType"==m.getBranch("member").get.getBranch("returnType").get.getKind)
   }
 
 }

@@ -113,6 +113,8 @@ object JavaIP {
       )
     }
 
+    val voidType = rule("voidType") {token("void")}
+
     val methodDecl = rule("methodDecl") {
       sequence(
         branch("qualifiers",zeroOrMore(qualifier)),
@@ -124,7 +126,7 @@ object JavaIP {
         branch("returnType",
           choice(
             typeUsage,
-            token("void")
+            voidType
           )
         ),
         capture("name", token("identifier")),
@@ -137,7 +139,7 @@ object JavaIP {
     }
 
     val memberDecl = rule("memberDecl") {
-      choice(fieldDecl, methodDecl)
+      branch("member",choice(fieldDecl, methodDecl))
     }
 
     val javaClass = rule("class") {
