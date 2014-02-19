@@ -98,9 +98,32 @@ object JavaIP {
       )
     }
 
-    val typeUsage = rule("typeUsage") {
+    /*val typeUsage = rule("typeUsage") {
       sequence(
         capture("name",token("identifier"))
+      )
+    }*/
+
+    val classType = rule("classType") {
+      capture("name",token("identifier"))
+    }
+
+    val primitiveType = rule("primitiveType") {
+      capture("name",choice(
+        token("int"),
+        token("byte"),
+        token("char"),
+        token("long"),
+        token("float"),
+        token("double"),
+        token("boolean")
+      ))
+    }
+
+    val typeUsage = subrule("typeUsage") {
+      choice(
+        primitiveType,
+        classType
       )
     }
 
@@ -115,14 +138,10 @@ object JavaIP {
 
     val voidType = rule("voidType") {token("void")}
 
+
     val methodDecl = rule("methodDecl") {
       sequence(
         branch("qualifiers",zeroOrMore(qualifier)),
-        /*choice(
-          branch("returnType",typeUsage),
-          branch("returnType",token("void"))
-        ),*/
-        //capture("returnType",token("void")),
         branch("returnType",
           choice(
             typeUsage,
@@ -139,7 +158,10 @@ object JavaIP {
     }
 
     val memberDecl = rule("memberDecl") {
-      branch("member",choice(fieldDecl, methodDecl))
+      choice(
+        branch("method",methodDecl),
+        branch("field",fieldDecl)
+      )
     }
 
     val javaClass = rule("class") {

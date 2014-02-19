@@ -172,7 +172,7 @@ class ParserSpec extends UnitSpec {
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
   }
 
-  it should "parse a method declaration" in {
+  it should "parse a method declaration with void return type" in {
     val code = "class A { void foo(){} }"
     val lexer = JavaIP.lexer
     val syntax = JavaIP.syntax(lexer)
@@ -185,8 +185,26 @@ class ParserSpec extends UnitSpec {
 
     assert(1==methods.size)
     val m = methods.head
-    assert("foo"==m.getBranch("member").get.getValue("name"))
-    assert("voidType"==m.getBranch("member").get.getBranch("returnType").get.getKind)
+    assert("foo"==m.getBranch("method").get.getValue("name"))
+    assert("voidType"==m.getBranch("method").get.getBranch("returnType").get.getKind)
+  }
+
+  it should "parse a method declaration with primitive return type" in {
+    val code = "class A { int foo(){} }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var methods = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      val members = node.getBranch("classDeclaration").get.getBranches("members")
+      methods = members
+    }}
+    lexer.input(code)
+
+    assert(1==methods.size)
+    val m = methods.head
+    assert("foo"==m.getBranch("method").get.getValue("name"))
+    assert("primitiveType"==m.getBranch("method").get.getBranch("returnType").get.getKind)
+    assert("int"==m.getBranch("method").get.getBranch("returnType").get.getValue("name"))
   }
 
 }
