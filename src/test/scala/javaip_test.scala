@@ -207,4 +207,22 @@ class ParserSpec extends UnitSpec {
     assert("int"==m.getBranch("method").get.getBranch("returnType").get.getValue("name"))
   }
 
+  it should "parse a field declaration with primitive type" in {
+    val code = "class A { int foo; }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+    val m = members.head
+    println(m.prettyPrint())
+    assert("foo"==m.getBranch("field").get.getValue("name"))
+    assert("primitiveType"==m.getBranch("field").get.getBranch("type").get.getKind)
+    assert("int"==m.getBranch("field").get.getBranch("type").get.getValue("name"))
+  }
+
 }

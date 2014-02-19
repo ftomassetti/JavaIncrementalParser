@@ -127,6 +127,8 @@ object JavaIP {
       )
     }
 
+    val voidType = rule("voidType") {token("void")}
+
     val fieldDecl = rule("fieldDecl") {
       sequence(
         branch("qualifiers",zeroOrMore(qualifier)),
@@ -135,9 +137,6 @@ object JavaIP {
         token(";").permissive
       )
     }
-
-    val voidType = rule("voidType") {token("void")}
-
 
     val methodDecl = rule("methodDecl") {
       sequence(
