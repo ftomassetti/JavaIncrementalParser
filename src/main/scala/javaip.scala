@@ -50,11 +50,13 @@ object JavaIP {
       "true", "false",
       "null",
       "byte","int", "char", "short", "long", "float", "double", "void",
-      "do", "while", "for", "switch", "case", "break", "return",
+      "do", "while", "for", "switch", "case", "break", "return", "throw",
       "import",
       "class","interface",
       "private","protected","public",
-      "static","native","final", "synchronized")
+      "static","native","final", "synchronized",
+      "extends","implements","throws"
+    )
 
     tokenizer
   }
@@ -184,6 +186,13 @@ object JavaIP {
       )
     }
 
+    val qualifiedIdentifier = rule("qualifiedIdentifier") {
+      oneOrMore(
+        capture("part",token("identifier")),
+        separator = token(".")
+      )
+    }
+
     val javaClass = rule("class") {
       // Consists of three sequential parts: "[" token, series of nested
       // elements separated with "," token, and losing "]" token.
@@ -191,6 +200,10 @@ object JavaIP {
         branch("qualifiers",zeroOrMore(qualifier)),
         token("class"),
         capture("name", token("identifier")),
+        optional(sequence(
+          token("extends"),
+          branch("baseClass",qualifiedIdentifier)
+        )),
         token("{"),
         branch("members",zeroOrMore(memberDecl)),
         token("}"),

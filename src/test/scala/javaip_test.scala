@@ -201,6 +201,11 @@ class ParserSpec extends UnitSpec {
     assert(name==node.getBranch("baseType").get.getValue("name"))
   }
 
+  def assertQualId(parts:List[String],node: Node) {
+    assert("qualifiedIdentifier"==node.getKind)
+    assert(parts==node.getValues("part").reverse)
+  }
+
   it should "parse a method declaration with primitive return type" in {
     val code = "class A { int foo(){} }"
     val lexer = JavaIP.lexer
@@ -286,6 +291,36 @@ class ParserSpec extends UnitSpec {
     assertIsPrimitive("int",p1.getBranch("type").get)
     assert("b"==p2.getValue("name"))
     assertIsClass("String",p2.getBranch("type").get)
+  }
+
+  it should "parse class extends clause" in {
+    val code = "class A extends B {}"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var classes = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      classes = node.getBranches("classDeclaration")
+    }}
+    lexer.input(code)
+
+    assert(1==classes.size)
+    val c = classes.head
+    assertQualId(List("B"),c.getBranch("baseClass").get)
+  }
+
+  it should "parse qualified identifier" in {
+    val code = "class A extends B.C.D {}"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var classes = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      classes = node.getBranches("classDeclaration")
+    }}
+    lexer.input(code)
+
+    assert(1==classes.size)
+    val c = classes.head
+    assertQualId(List("B","C","D"),c.getBranch("baseClass").get)
   }
 
 }
