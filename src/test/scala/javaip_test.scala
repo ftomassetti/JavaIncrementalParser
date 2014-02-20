@@ -202,6 +202,11 @@ class ParserSpec extends UnitSpec {
     assert(parts==node.getValues("part").reverse)
   }
 
+  def assertNodeIs(kind:String,values:Map[String,String],node:Node){
+    assert(kind==node.getKind)
+    values.foreach { case (key,value)=> assert(value==node.getValue(key)) }
+  }
+
  def assertAccessQualifier(name:String,node: Node){
    assert(name==node.getBranch("qualifiers").get.getBranch("access").get.getValue("name"))
  }
@@ -378,6 +383,24 @@ class ParserSpec extends UnitSpec {
     assertQualId(List("B"),bc)
     assertQualId(List("C"),i1)
     assertQualId(List("D"),i2)
+  }
+
+  it should "parse a field declaration with initializer" in {
+    val code = "class A { int foo = 1; }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+
+    val m = members.head.getBranch("field").get
+    assert("foo"==m.getValue("name"))
+    assertIsPrimitive("int",m.getBranch("type").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get)
   }
 
 }

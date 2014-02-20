@@ -4,8 +4,9 @@ import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
   Contextualizer, Token}
 import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule
+import name.lakhin.eliah.projects.papacarlo.syntax.Expressions._
 import name.lakhin.eliah.projects.papacarlo.syntax.NodeAccessor
-import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
+import name.lakhin.eliah.projects.papacarlo.syntax.rules.{ExpressionRule, NamedRule}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule._
 
 object JavaIP {
@@ -43,7 +44,7 @@ object JavaIP {
     )
 
     terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",".",",",
-      "&&","||","+=","-=","*=","/=","&","|","[","]",
+      "&&","||","+=","-=","*=","/=","==","=","&","|","[","]",
       "//","/*","*/")
 
     keywords(
@@ -146,6 +147,12 @@ object JavaIP {
         branch("qualifiers",zeroOrMore(qualifier)),
         branch("type",typeUsage),
         capture("name", token("identifier")),
+        optional(
+          sequence(
+            token("="),
+            branch("initializationValue",exp)
+          )
+        ),
         token(";").permissive
       )
     }
@@ -242,6 +249,32 @@ object JavaIP {
         branch("imports",zeroOrMore(importDir)),
         branch("classDeclaration",javaClass)
       )
+    }
+
+    val integerLiteral = rule("integerLiteral") {
+      capture("value",token("integer"))
+    }
+
+    val expElement = subrule("expElement") {
+      choice(
+        integerLiteral
+      )
+    }
+
+    val exp = rule("expression").main {
+      val rule =
+        expression(branch("operand", recover(expElement, "operand required")))
+
+      group(rule, "(", ")")
+      postfix(rule, "%", 1)
+      prefix(rule, "+", 2)
+      prefix(rule, "-", 2)
+      infix(rule, "*", 3)
+      infix(rule, "/", 3, rightAssociativity = true)
+      infix(rule, "+", 4)
+      infix(rule, "-", 4)
+
+      rule
     }
 
   }.syntax
