@@ -540,6 +540,21 @@ class ParserSpec extends UnitSpec {
     assertAbstractQualifier(c)
   }
 
+  it should "parse abstract method" in {
+    val code = "abstract class A { abstract void foo(); }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+    val m = members.head.getBranch("method").get
+    println(m.prettyPrint())
+  }
+
   it should "parse this ref" in {
     val code = "class A { void foo(){ this; } }"
     val lexer = JavaIP.lexer
