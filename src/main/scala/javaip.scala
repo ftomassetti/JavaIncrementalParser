@@ -56,7 +56,8 @@ object JavaIP {
       "class","interface",
       "private","protected","public",
       "static","native","final", "synchronized",
-      "extends","implements","throws"
+      "extends","implements","throws",
+      "this"
     )
 
     tokenizer
@@ -100,12 +101,6 @@ object JavaIP {
         capture("final", token("final"))
       )
     }
-
-    /*val typeUsage = rule("typeUsage") {
-      sequence(
-        capture("name",token("identifier"))
-      )
-    }*/
 
     val classType = rule("classType") {
       capture("name",token("identifier"))
@@ -258,18 +253,24 @@ object JavaIP {
     val fieldAccess = rule("fieldAccess") {
       sequence(
         branch("container",exp),
+        token("."),
         capture("fieldName",token("identifier"))
       )
+    }
+
+    val variableReference = rule("variableReference") {
+      capture("name",token("identifier"))
     }
 
     val expElement = subrule("expElement") {
       choice(
         integerLiteral,
-        fieldAccess
+        fieldAccess,
+        variableReference
       )
     }
 
-    val exp = rule("expression").main {
+    val exp : NamedRule = rule("expression") {
       val rule =
         expression(branch("operand", recover(expElement, "operand required")))
 
