@@ -283,7 +283,7 @@ object JavaIP {
       infix(rule, "+", 4)
       infix(rule, "-", 4)
 
-      rule
+      choice(rule,expElement)
     }
 
   }.syntax
