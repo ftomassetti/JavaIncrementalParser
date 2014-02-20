@@ -179,6 +179,7 @@ object JavaIP {
         optional(
           sequence(
             token("{"),
+            zeroOrMore(branch("stmts",statement)),
             token("}")
           )
         ),
@@ -255,6 +256,10 @@ object JavaIP {
       capture("value",token("integer"))
     }
 
+    val thisReference = rule("thisReference") {
+      token("this")
+    }
+
     val variableReference = rule("variableReference") {
       capture("name",token("identifier"))
     }
@@ -262,8 +267,24 @@ object JavaIP {
     val expElement = subrule("expElement") {
       choice(
         integerLiteral,
-        variableReference
+        variableReference,
+        thisReference
       )
+    }
+
+    val expressionStatement = rule("expressionStatement"){
+      sequence(
+        branch("expression",exp),
+        token(";")
+      )
+    }
+
+    val emptyStatement = rule("emptyStatement"){
+      token(";")
+    }
+
+    val statement = subrule("statement") {
+      choice(expressionStatement,emptyStatement)
     }
 
     val expComp : NamedRule = rule("expression") {

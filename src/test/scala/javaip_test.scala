@@ -536,7 +536,6 @@ class ParserSpec extends UnitSpec {
 
     assert(1==classes.size)
     val c = classes.head
-    println(c.prettyPrint())
     assertAbstractQualifier(c)
   }
 
@@ -552,7 +551,6 @@ class ParserSpec extends UnitSpec {
 
     assert(1==members.size)
     val m = members.head.getBranch("method").get
-    println(m.prettyPrint())
   }
 
   it should "parse this ref" in {
@@ -567,11 +565,10 @@ class ParserSpec extends UnitSpec {
 
     assert(1==members.size)
     val m = members.head.getBranch("method").get
-    println(m.prettyPrint())
-    /*assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"a"),m.getBranch("initializationValue").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("container").get)*/
+    assert(1==m.getBranches("stmts").size)
+    val s = m.getBranches("stmts").head
+    assertNodeIs("expressionStatement",Map[String,String](),s);
+    assertNodeIs("thisReference",Map[String,String](),s.getBranch("expression").get);
   }
 
 }
