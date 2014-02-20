@@ -189,6 +189,12 @@ class ParserSpec extends UnitSpec {
     assert("voidType"==m.getBranch("method").get.getBranch("returnType").get.getKind)
   }
 
+  def assertIsPrimitive(name:String,node: Node,arrayLevel: Int = 0) {
+    assert(arrayLevel==node.getBranches("array").size)
+    assert("primitiveType"==node.getBranch("baseType").get.getKind)
+    assert(name==node.getBranch("baseType").get.getValue("name"))
+  }
+
   it should "parse a method declaration with primitive return type" in {
     val code = "class A { int foo(){} }"
     val lexer = JavaIP.lexer
@@ -203,8 +209,7 @@ class ParserSpec extends UnitSpec {
     assert(1==methods.size)
     val m = methods.head
     assert("foo"==m.getBranch("method").get.getValue("name"))
-    assert("primitiveType"==m.getBranch("method").get.getBranch("returnType").get.getKind)
-    assert("int"==m.getBranch("method").get.getBranch("returnType").get.getValue("name"))
+    assertIsPrimitive("int",m.getBranch("method").get.getBranch("returnType").get)
   }
 
   it should "parse a field declaration with primitive type" in {
@@ -220,8 +225,41 @@ class ParserSpec extends UnitSpec {
     assert(1==members.size)
     val m = members.head
     assert("foo"==m.getBranch("field").get.getValue("name"))
-    assert("primitiveType"==m.getBranch("field").get.getBranch("type").get.getKind)
-    assert("int"==m.getBranch("field").get.getBranch("type").get.getValue("name"))
+    assertIsPrimitive("int",m.getBranch("field").get.getBranch("type").get)
+  }
+
+  it should "parse a field declaration with array type" in {
+    val code = "class A { int[] foo; }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+    val m = members.head
+    assert("foo"==m.getBranch("field").get.getValue("name"))
+
+    assertIsPrimitive("int",m.getBranch("field").get.getBranch("type").get,1)
+  }
+
+  it should "parse a field declaration with triple array type" in {
+    val code = "class A { int[][][] foo; }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+    val m = members.head
+    assert("foo"==m.getBranch("field").get.getValue("name"))
+
+    assertIsPrimitive("int",m.getBranch("field").get.getBranch("type").get,3)
   }
 
 }

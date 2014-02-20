@@ -120,10 +120,20 @@ object JavaIP {
       ))
     }
 
-    val typeUsage = subrule("typeUsage") {
-      choice(
-        primitiveType,
-        classType
+    val arrayTypeMod = rule("arrayType") {
+      sequence(
+        token("["),
+        token("]")
+      )
+    }
+
+    val typeUsage = rule("typeUsage") {
+      sequence(
+        branch("baseType", choice(
+          primitiveType,
+          classType
+        )),
+        zeroOrMore(branch("array",arrayTypeMod))
       )
     }
 
