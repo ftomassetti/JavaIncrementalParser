@@ -323,4 +323,23 @@ class ParserSpec extends UnitSpec {
     assertQualId(List("B","C","D"),c.getBranch("baseClass").get)
   }
 
+  it should "parse class implements clause" in {
+    val code = "class A implements C, D {}"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var classes = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      classes = node.getBranches("classDeclaration")
+    }}
+    lexer.input(code)
+
+    assert(1==classes.size)
+    val c = classes.head
+    assert(2==c.getBranches("interfaces").size)
+    val i1 = c.getBranches("interfaces").head
+    val i2 = c.getBranches("interfaces").tail.head
+    assertQualId(List("C"),i1)
+    assertQualId(List("D"),i2)
+  }
+
 }

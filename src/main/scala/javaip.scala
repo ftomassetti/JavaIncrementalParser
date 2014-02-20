@@ -204,6 +204,15 @@ object JavaIP {
           token("extends"),
           branch("baseClass",qualifiedIdentifier)
         )),
+        optional(
+          sequence(
+            token("implements"),
+            oneOrMore(
+              branch("interfaces",qualifiedIdentifier),
+              separator = token(",")
+            )
+          )
+        ),
         token("{"),
         branch("members",zeroOrMore(memberDecl)),
         token("}"),
