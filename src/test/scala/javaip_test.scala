@@ -207,9 +207,13 @@ class ParserSpec extends UnitSpec {
     values.foreach { case (key,value)=> assert(value==node.getValue(key)) }
   }
 
- def assertAccessQualifier(name:String,node: Node){
-   assert(name==node.getBranch("qualifiers").get.getBranch("access").get.getValue("name"))
- }
+  def assertAccessQualifier(name:String,node: Node){
+    assert(name==node.getBranch("qualifiers").get.getBranch("access").get.getValue("name"))
+  }
+
+  def assertAbstractQualifier(node: Node){
+    assert("abstract"==node.getBranch("qualifiers").get.getValue("abstract"))
+  }
 
   it should "parse a method declaration with primitive return type" in {
     val code = "class A { int foo(){} }"
@@ -518,6 +522,41 @@ class ParserSpec extends UnitSpec {
     assertIsPrimitive("int",m.getBranch("type").get)
     assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"a"),m.getBranch("initializationValue").get)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("container").get)
+  }
+
+  it should "parse abstract class" in {
+    val code = "abstract class A { }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var classes = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      classes ::= node.getBranch("classDeclaration").get
+    }}
+    lexer.input(code)
+
+    assert(1==classes.size)
+    val c = classes.head
+    println(c.prettyPrint())
+    assertAbstractQualifier(c)
+  }
+
+  it should "parse this ref" in {
+    val code = "class A { void foo(){ this; } }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+    val m = members.head.getBranch("method").get
+    println(m.prettyPrint())
+    /*assert("foo"==m.getValue("name"))
+    assertIsPrimitive("int",m.getBranch("type").get)
+    assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"a"),m.getBranch("initializationValue").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("container").get)*/
   }
 
 }

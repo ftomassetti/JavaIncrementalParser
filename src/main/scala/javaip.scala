@@ -55,7 +55,7 @@ object JavaIP {
       "import",
       "class","interface",
       "private","protected","public",
-      "static","native","final", "synchronized",
+      "static","native","final", "synchronized","abstract",
       "extends","implements","throws",
       "this"
     )
@@ -98,7 +98,8 @@ object JavaIP {
       choice(
         branch("access", accessQualifier),
         capture("static", token("static")),
-        capture("final", token("final"))
+        capture("final", token("final")),
+        capture("abstract",token("abstract"))
       )
     }
 
@@ -175,8 +176,12 @@ object JavaIP {
           separator = token(",")
         ),
         token(")"),
-        token("{"),
-        token("}"),
+        optional(
+          sequence(
+            token("{"),
+            token("}")
+          )
+        ),
         optional(token(";"))
       )
     }
