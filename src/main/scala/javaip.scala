@@ -255,9 +255,17 @@ object JavaIP {
       capture("value",token("integer"))
     }
 
+    val fieldAccess = rule("fieldAccess") {
+      sequence(
+        branch("container",exp),
+        capture("fieldName",token("identifier"))
+      )
+    }
+
     val expElement = subrule("expElement") {
       choice(
-        integerLiteral
+        integerLiteral,
+        fieldAccess
       )
     }
 
