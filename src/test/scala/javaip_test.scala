@@ -219,7 +219,6 @@ class ParserSpec extends UnitSpec {
 
     assert(1==members.size)
     val m = members.head
-    println(m.prettyPrint())
     assert("foo"==m.getBranch("field").get.getValue("name"))
     assert("primitiveType"==m.getBranch("field").get.getBranch("type").get.getKind)
     assert("int"==m.getBranch("field").get.getBranch("type").get.getValue("name"))
