@@ -195,6 +195,12 @@ class ParserSpec extends UnitSpec {
     assert(name==node.getBranch("baseType").get.getValue("name"))
   }
 
+  def assertIsClass(name:String,node: Node,arrayLevel: Int = 0) {
+    assert(arrayLevel==node.getBranches("array").size)
+    assert("classType"==node.getBranch("baseType").get.getKind)
+    assert(name==node.getBranch("baseType").get.getValue("name"))
+  }
+
   it should "parse a method declaration with primitive return type" in {
     val code = "class A { int foo(){} }"
     val lexer = JavaIP.lexer
@@ -260,6 +266,26 @@ class ParserSpec extends UnitSpec {
     assert("foo"==m.getBranch("field").get.getValue("name"))
 
     assertIsPrimitive("int",m.getBranch("field").get.getBranch("type").get,3)
+  }
+
+  it should "parse method parameters" in {
+    val code = "class A { void baz(int a,String b){} }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+    val m = members.head.getBranch("method").get
+    val p1 = m.getBranches("params").head
+    val p2 = m.getBranches("params").tail.head
+    assert("a"==p1.getValue("name"))
+    assertIsPrimitive("int",p1.getBranch("type").get)
+    assert("b"==p2.getValue("name"))
+    assertIsClass("String",p2.getBranch("type").get)
   }
 
 }

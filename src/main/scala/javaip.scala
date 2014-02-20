@@ -42,7 +42,7 @@ object JavaIP {
             rangeOf('0', '9'))))
     )
 
-    terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",".",
+    terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",".",",",
       "&&","||","+=","-=","*=","/=","&","|","[","]",
       "//","/*","*/")
 
@@ -148,6 +148,13 @@ object JavaIP {
       )
     }
 
+    val paramDecl = rule("paramDecl") {
+      sequence(
+        branch("type",typeUsage),
+        capture("name",token("identifier"))
+      )
+    }
+
     val methodDecl = rule("methodDecl") {
       sequence(
         branch("qualifiers",zeroOrMore(qualifier)),
@@ -159,6 +166,10 @@ object JavaIP {
         ),
         capture("name", token("identifier")),
         token("("),
+        zeroOrMore(
+          branch("params", paramDecl),
+          separator = token(",")
+        ),
         token(")"),
         token("{"),
         token("}"),
