@@ -250,14 +250,6 @@ object JavaIP {
       capture("value",token("integer"))
     }
 
-    val fieldAccess = rule("fieldAccess") {
-      sequence(
-        branch("container",exp),
-        token("."),
-        capture("fieldName",token("identifier"))
-      )
-    }
-
     val variableReference = rule("variableReference") {
       capture("name",token("identifier"))
     }
@@ -265,14 +257,13 @@ object JavaIP {
     val expElement = subrule("expElement") {
       choice(
         integerLiteral,
-        fieldAccess,
         variableReference
       )
     }
 
-    val exp : NamedRule = rule("expression") {
+    val expComp : NamedRule = rule("expression") {
       val rule =
-        expression(branch("operand", recover(expElement, "operand required")))
+        expression(branch("operand", expElement))
 
       group(rule, "(", ")")
       postfix(rule, "%", 1)
@@ -283,7 +274,19 @@ object JavaIP {
       infix(rule, "+", 4)
       infix(rule, "-", 4)
 
-      choice(rule,expElement)
+      rule
+    }
+
+    val fieldAccess = rule("fieldAccess") {
+      sequence(
+        branch("container",expComp),
+        token("."),
+        capture("fieldName",token("identifier"))
+      )
+    }
+
+    val exp = subrule("expUsage") {
+      choice(fieldAccess,expComp)
     }
 
   }.syntax

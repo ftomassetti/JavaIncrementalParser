@@ -483,13 +483,12 @@ class ParserSpec extends UnitSpec {
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),m.getBranch("initializationValue").get.getBranch("right").get)
   }
 
-  /*it should "parse variable reference expression" in {
+  it should "parse variable reference expression" in {
     val code = "class A { int foo = a; }"
     val lexer = JavaIP.lexer
     val syntax = JavaIP.syntax(lexer)
     var members = List[Node]()
     syntax.onNodeMerge.bind {node => {
-      println(node.prettyPrint())
       members = node.getBranch("classDeclaration").get.getBranches("members")
     }}
     lexer.input(code)
@@ -500,15 +499,14 @@ class ParserSpec extends UnitSpec {
     assert("foo"==m.getValue("name"))
     assertIsPrimitive("int",m.getBranch("type").get)
     assertNodeIs("variableReference",Map[String,String]("name"->"a"),m.getBranch("initializationValue").get)
-  }*/
+  }
 
   it should "parse field access expression" in {
-    val code = "class A { int foo = 1.a; }"
+    val code = "class A { int foo = 1 . a; }"
     val lexer = JavaIP.lexer
     val syntax = JavaIP.syntax(lexer)
     var members = List[Node]()
     syntax.onNodeMerge.bind {node => {
-      //println(node.prettyPrint())
       members = node.getBranch("classDeclaration").get.getBranches("members")
     }}
     lexer.input(code)
@@ -518,7 +516,7 @@ class ParserSpec extends UnitSpec {
     val m = members.head.getBranch("field").get
     assert("foo"==m.getValue("name"))
     assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"b"),m.getBranch("initializationValue").get)
+    assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"a"),m.getBranch("initializationValue").get)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("container").get)
   }
 
