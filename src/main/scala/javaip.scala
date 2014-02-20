@@ -311,8 +311,16 @@ object JavaIP {
       )
     }
 
-    val exp = subrule("expUsage") {
-      choice(fieldAccess,expComp)
+    val functionCall = rule("functionCall"){
+      sequence(
+        capture("name",token("identifier")),
+        token("("),
+        zeroOrMore(branch("actualParams",exp),separator = token(",")),
+        token(")"))
+    }
+
+    val exp : Rule = subrule("expUsage") {
+      choice(fieldAccess,expComp,functionCall)
     }
 
   }.syntax

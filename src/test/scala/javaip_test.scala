@@ -571,4 +571,22 @@ class ParserSpec extends UnitSpec {
     assertNodeIs("thisReference",Map[String,String](),s.getBranch("expression").get);
   }
 
+  it should "parse function call without args" in {
+    val code = "class A { int foo = baz(); }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      println(node.prettyPrint())
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+
+    val m = members.head.getBranch("field").get
+    val v = m.getBranch("initializationValue").get
+    println(v.prettyPrint())
+  }
+
 }
