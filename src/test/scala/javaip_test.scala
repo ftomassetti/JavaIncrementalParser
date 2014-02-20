@@ -116,9 +116,7 @@ class ParserSpec extends UnitSpec {
     assert(classes contains "A")
     assert(2==classes.get("A").get.getBranches("qualifiers").size)
     assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
-    assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("public")).size)
-    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("protected")).size)
-    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
+    assertAccessQualifier("public",classes.get("A").get)
   }
 
   it should "parse a basic class with comments" in {
@@ -136,9 +134,7 @@ class ParserSpec extends UnitSpec {
     assert(classes contains "A")
     assert(2==classes.get("A").get.getBranches("qualifiers").size)
     assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
-    assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("public")).size)
-    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("protected")).size)
-    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
+    assertAccessQualifier("public",classes.get("A").get)
   }
 
   it should "parse import directives" in {
@@ -206,6 +202,10 @@ class ParserSpec extends UnitSpec {
     assert(parts==node.getValues("part").reverse)
   }
 
+ def assertAccessQualifier(name:String,node: Node){
+   assert(name==node.getBranch("qualifiers").get.getBranch("access").get.getValue("name"))
+ }
+
   it should "parse a method declaration with primitive return type" in {
     val code = "class A { int foo(){} }"
     val lexer = JavaIP.lexer
@@ -237,6 +237,23 @@ class ParserSpec extends UnitSpec {
     val m = members.head
     assert("foo"==m.getBranch("field").get.getValue("name"))
     assertIsPrimitive("int",m.getBranch("field").get.getBranch("type").get)
+  }
+
+  it should "parse a field declaration with qualifiers" in {
+    val code = "class A { private int foo; }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+    val m = members.head.getBranch("field").get
+    assertAccessQualifier("private",m)
+    assert("foo"==m.getValue("name"))
+    assertIsPrimitive("int",m.getBranch("type").get)
   }
 
   it should "parse a field declaration with array type" in {

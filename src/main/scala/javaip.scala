@@ -85,11 +85,11 @@ object JavaIP {
     import Rule._
 
     val accessQualifier = rule("accessQualifier") {
-      choice(
-        capture("public",token("public")),
-        capture("protected",token("protected")),
-        capture("private",token("private"))
-      )
+      capture("name",choice(
+        token("public"),
+        token("protected"),
+        token("private")
+      ))
     }
 
     val qualifier = rule("qualifier") {
