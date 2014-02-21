@@ -44,6 +44,15 @@ object JavaIP {
     ).mutable
 
     tokenCategory(
+      "char",
+      sequence(
+        chunk("'"),
+        anyExceptOf("'"),
+        chunk("'")
+      )
+    ).mutable
+
+    tokenCategory(
       "identifier",
       sequence(
         choice(chunk("_"),rangeOf('a', 'z'),rangeOf('A','Z')),
@@ -108,6 +117,10 @@ object JavaIP {
       capture("value",token("string"))
     }
 
+    val charLiteral = rule("charLiteral") {
+      capture("value",token("char"))
+    }
+
     val thisReference = rule("thisReference") {
       token("this")
     }
@@ -120,6 +133,7 @@ object JavaIP {
       choice(
         integerLiteral,
         stringLiteral,
+        charLiteral,
         variableReference,
         thisReference
       )

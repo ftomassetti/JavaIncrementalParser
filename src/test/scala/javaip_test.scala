@@ -635,4 +635,21 @@ class ParserSpec extends UnitSpec {
     assertNodeIs("stringLiteral",Map[String,String]("value"->"\"ciao\""),v)
   }
 
+  it should "parse char literal" in {
+    val code = "class A { int foo = 'a'; }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+
+    val m = members.head.getBranch("field").get
+    val v = m.getBranch("initializationValue").get
+    assertNodeIs("charLiteral",Map[String,String]("value"->"'a'"),v)
+  }
+
 }
