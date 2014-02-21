@@ -32,6 +32,18 @@ object JavaIP {
     )
 
     tokenCategory(
+      "string",
+      sequence(
+        chunk("\""),
+        oneOrMore(choice(
+          anyExceptOf("\n\r\\\""),
+          sequence(chunk("\\"), anyExceptOf("\n\r"))
+        )),
+        chunk("\"")
+      )
+    ).mutable
+
+    tokenCategory(
       "identifier",
       sequence(
         choice(chunk("_"),rangeOf('a', 'z'),rangeOf('A','Z')),
@@ -92,6 +104,10 @@ object JavaIP {
       capture("value",token("integer"))
     }
 
+    val stringLiteral = rule("stringLiteral") {
+      capture("value",token("string"))
+    }
+
     val thisReference = rule("thisReference") {
       token("this")
     }
@@ -103,6 +119,7 @@ object JavaIP {
     val expElement = subrule("expElement") {
       choice(
         integerLiteral,
+        stringLiteral,
         variableReference,
         thisReference
       )
@@ -326,8 +343,6 @@ object JavaIP {
     val statement = subrule("statement") {
       choice(expressionStatement,emptyStatement)
     }
-
-
 
   }.syntax
 }
