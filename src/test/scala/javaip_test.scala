@@ -132,6 +132,11 @@ class ParserSpec extends UnitSpec {
     return s
   }
 
+  def parseExpr(exprCode : String) : Node = {
+    val s = parseStmt("a = "+exprCode+";")
+    return s.getBranch("value").get
+  }
+
   // Helper methods : assert
 
   def assertIsPrimitive(name:String,node: Node,arrayLevel: Int = 0) {
@@ -153,7 +158,7 @@ class ParserSpec extends UnitSpec {
 
   def assertNodeIs(kind:String,values:Map[String,String],node:Node){
     assert(kind==node.getKind)
-    values.foreach { case (key,value)=> assert(value==node.getValue(key)) }
+    values.foreach { case (key,value)=> assert(value==node.getValue(key),"Value of "+key+" expected to be "+value+". Node: "+node.prettyPrint()) }
   }
 
   def assertAccessQualifier(name:String,node: Node){
@@ -713,6 +718,38 @@ class ParserSpec extends UnitSpec {
     val s = parseStmt("int a = 1;")
     assertNodeIs("localVarDecl",Map[String,String]("name"->"a"),s);
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("initializationValue").get)
+  }
+
+  it should "parse comparison" in {
+    var e = parseExpr("1==2")
+    assertNodeIs("==",Map[String,String](),e)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+
+    e = parseExpr("1!=2")
+    assertNodeIs("!=",Map[String,String](),e)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+
+    e = parseExpr("1<2")
+    assertNodeIs("<",Map[String,String](),e)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+
+    e = parseExpr("1>2")
+    assertNodeIs(">",Map[String,String](),e)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+
+    e = parseExpr("1<=2")
+    assertNodeIs("<=",Map[String,String](),e)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+
+    e = parseExpr("1>=2")
+    assertNodeIs(">=",Map[String,String](),e)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
   }
 
 }

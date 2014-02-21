@@ -65,7 +65,9 @@ object JavaIP {
     )
 
     terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",".",",",
-      "&&","||","+=","-=","*=","/=","==","=","&","|","[","]",
+      "&&","||","+=","-=","*=","/=",
+      "==","!=","<=",">=","<",">",
+      "=","&","|","[","]",
       "//","/*","*/")
 
     keywords(
@@ -152,6 +154,12 @@ object JavaIP {
       infix(rule, "/", 3, rightAssociativity = true)
       infix(rule, "+", 4)
       infix(rule, "-", 4)
+      infix(rule, "==", 5)
+      infix(rule, "!=", 5)
+      infix(rule, ">=", 5)
+      infix(rule, "<=", 5)
+      infix(rule, "<", 5)
+      infix(rule, ">", 5)
 
       rule
     }
