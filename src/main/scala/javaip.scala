@@ -355,6 +355,17 @@ object JavaIP {
       )
     }
 
+    // Statements
+
+    val assignment = rule("assignment"){
+      sequence(
+        branch("assigned",qualifiedIdentifier),
+        token("="),
+        branch("value",exp),
+        token(";")
+      )
+    }
+
     val expressionStatement = rule("expressionStatement"){
       sequence(
         branch("expression",exp),
@@ -367,7 +378,7 @@ object JavaIP {
     }
 
     val statement = subrule("statement") {
-      choice(expressionStatement,emptyStatement)
+      choice(expressionStatement,emptyStatement,assignment)
     }
 
   }.syntax
