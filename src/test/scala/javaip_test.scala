@@ -692,4 +692,22 @@ class ParserSpec extends UnitSpec {
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("value").get)
   }
 
+  it should "parse return statement" in {
+    val code = "class A { void foo(){return 1;} }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+    val m = members.head.getBranch("method").get
+    assert(1==m.getBranches("stmts").size)
+    val s = m.getBranches("stmts").head
+    assertNodeIs("returnStatement",Map[String,String](),s);
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("value").get)
+  }
+
 }

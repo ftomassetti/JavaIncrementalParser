@@ -377,8 +377,16 @@ object JavaIP {
       token(";")
     }
 
+    val returnStatement = rule("returnStatement"){
+      sequence(
+        token("return"),
+        branch("value",exp),
+        token(";")
+      )
+    }
+
     val statement = subrule("statement") {
-      choice(expressionStatement,emptyStatement,assignment)
+      choice(expressionStatement,emptyStatement,assignment,returnStatement)
     }
 
   }.syntax
