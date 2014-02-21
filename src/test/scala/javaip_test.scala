@@ -652,4 +652,25 @@ class ParserSpec extends UnitSpec {
     assertNodeIs("charLiteral",Map[String,String]("value"->"'a'"),v)
   }
 
+  it should "parse instantiation of qualified class name with args" in {
+    val code = "class A { int foo = new fooz.Baz(1,2); }"
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    var members = List[Node]()
+    syntax.onNodeMerge.bind {node => {
+      members = node.getBranch("classDeclaration").get.getBranches("members")
+    }}
+    lexer.input(code)
+
+    assert(1==members.size)
+
+    val m = members.head.getBranch("field").get
+    val v = m.getBranch("initializationValue").get
+    assertNodeIs("instantiation",Map[String,String](),v)
+    assertQualId(List[String]("fooz","Baz"),v.getBranch("className").get)
+    assert(2==v.getBranches("actualParams").size)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),v.getBranches("actualParams").head)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),v.getBranches("actualParams").tail.head)
+  }
+
 }

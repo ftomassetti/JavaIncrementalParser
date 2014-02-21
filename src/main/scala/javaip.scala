@@ -78,7 +78,8 @@ object JavaIP {
       "private","protected","public",
       "static","native","final", "synchronized","abstract",
       "extends","implements","throws",
-      "this"
+      "this",
+      "new"
     )
 
     tokenizer
@@ -171,8 +172,19 @@ object JavaIP {
         token(")"))
     }
 
+    val instantiation = rule("instantiation"){
+      sequence(
+        token("new"),
+        branch("className",qualifiedIdentifier),
+        token("("),
+        zeroOrMore(branch("actualParams",exp),separator = token(",")),
+        token(")"),
+        optional(token(";"))
+      )
+    }
+
     val exp : Rule = subrule("expUsage") {
-      choice(fieldAccess,functionCall,expComp)
+      choice(fieldAccess,functionCall,expComp,instantiation)
     }
 
     // Expressions end
