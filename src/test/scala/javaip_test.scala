@@ -86,31 +86,78 @@ class TokenizerSpec extends UnitSpec {
 
 class ParserSpec extends UnitSpec {
 
-  it should "parse a basic class" in {
-    val code = "class A { }"
+  // Helper methods : parsing
+
+  def parse(code : String, f : Node => Any) {
     val lexer = JavaIP.lexer
     val syntax = JavaIP.syntax(lexer)
-    var classes = List[String]()
     syntax.onNodeMerge.bind {node => {
-      val classNode = node.getBranch("classDeclaration").get
-      classes ::= classNode.getValue("name")
+      f(node)
     }}
     lexer.input(code)
+  }
+
+  def parseAndGetClassesList(code : String) : List[Node] = {
+    var classes = List[Node]()
+    parse(code,node => {
+      val classNode = node.getBranch("classDeclaration").get
+      classes ::= classNode
+    })
+    return classes
+  }
+
+  def parseAndGetClassesMap(code : String) : Map[String,Node] = {
+    var classes = Map[String,Node]()
+    parse(code,node => {
+      val classNode = node.getBranch("classDeclaration").get
+      classes += (classNode.getValue("name") -> classNode)
+    })
+    return classes
+  }
+
+  // Helper methods : assert
+
+  def assertIsPrimitive(name:String,node: Node,arrayLevel: Int = 0) {
+    assert(arrayLevel==node.getBranches("array").size)
+    assert("primitiveType"==node.getBranch("baseType").get.getKind)
+    assert(name==node.getBranch("baseType").get.getValue("name"))
+  }
+
+  def assertIsClass(name:String,node: Node,arrayLevel: Int = 0) {
+    assert(arrayLevel==node.getBranches("array").size)
+    assert("classType"==node.getBranch("baseType").get.getKind)
+    assert(name==node.getBranch("baseType").get.getValue("name"))
+  }
+
+  def assertQualId(parts:List[String],node: Node) {
+    assert("qualifiedIdentifier"==node.getKind)
+    assert(parts==node.getValues("part").reverse)
+  }
+
+  def assertNodeIs(kind:String,values:Map[String,String],node:Node){
+    assert(kind==node.getKind)
+    values.foreach { case (key,value)=> assert(value==node.getValue(key)) }
+  }
+
+  def assertAccessQualifier(name:String,node: Node){
+    assert(name==node.getBranch("qualifiers").get.getBranch("access").get.getValue("name"))
+  }
+
+  def assertAbstractQualifier(node: Node){
+    assert("abstract"==node.getBranch("qualifiers").get.getValue("abstract"))
+  }
+
+  // Tests
+
+  it should "parse a basic class" in {
+    var classes = parseAndGetClassesList("class A { }")
 
     assert(1==classes.size)
-    assert("A"==classes.head)
+    assert("A"==classes.head.getValue("name"))
   }
 
   it should "parse a basic class with qualifiers" in {
-    val code = "public static class A { }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var classes = Map[String,Node]()
-    syntax.onNodeMerge.bind {node => {
-      val classNode = node.getBranch("classDeclaration").get
-      classes += (classNode.getValue("name") -> classNode)
-    }}
-    lexer.input(code)
+    var classes = parseAndGetClassesMap("public static class A { }")
 
     assert(1==classes.size)
     assert(classes contains "A")
@@ -120,15 +167,7 @@ class ParserSpec extends UnitSpec {
   }
 
   it should "parse a basic class with comments" in {
-    val code = "public /*ciao*/ static // hey! \n class /*come va?*/ A // last comment\n{ }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var classes = Map[String,Node]()
-    syntax.onNodeMerge.bind {node => {
-      val classNode = node.getBranch("classDeclaration").get
-      classes += (classNode.getValue("name") -> classNode)
-    }}
-    lexer.input(code)
+    var classes = parseAndGetClassesMap("public /*ciao*/ static // hey! \n class /*come va?*/ A // last comment\n{ }")
 
     assert(1==classes.size)
     assert(classes contains "A")
@@ -183,36 +222,6 @@ class ParserSpec extends UnitSpec {
     val m = methods.head
     assert("foo"==m.getBranch("method").get.getValue("name"))
     assert("voidType"==m.getBranch("method").get.getBranch("returnType").get.getKind)
-  }
-
-  def assertIsPrimitive(name:String,node: Node,arrayLevel: Int = 0) {
-    assert(arrayLevel==node.getBranches("array").size)
-    assert("primitiveType"==node.getBranch("baseType").get.getKind)
-    assert(name==node.getBranch("baseType").get.getValue("name"))
-  }
-
-  def assertIsClass(name:String,node: Node,arrayLevel: Int = 0) {
-    assert(arrayLevel==node.getBranches("array").size)
-    assert("classType"==node.getBranch("baseType").get.getKind)
-    assert(name==node.getBranch("baseType").get.getValue("name"))
-  }
-
-  def assertQualId(parts:List[String],node: Node) {
-    assert("qualifiedIdentifier"==node.getKind)
-    assert(parts==node.getValues("part").reverse)
-  }
-
-  def assertNodeIs(kind:String,values:Map[String,String],node:Node){
-    assert(kind==node.getKind)
-    values.foreach { case (key,value)=> assert(value==node.getValue(key)) }
-  }
-
-  def assertAccessQualifier(name:String,node: Node){
-    assert(name==node.getBranch("qualifiers").get.getBranch("access").get.getValue("name"))
-  }
-
-  def assertAbstractQualifier(node: Node){
-    assert("abstract"==node.getBranch("qualifiers").get.getValue("abstract"))
   }
 
   it should "parse a method declaration with primitive return type" in {
