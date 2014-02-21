@@ -704,7 +704,7 @@ class ParserSpec extends UnitSpec {
 
   it should "parse return statement" in {
     val s = parseStmt("return 1;")
-    assertNodeIs("returnStatement",Map[String,String](),s);
+    assertNodeIs("returnStmt",Map[String,String](),s);
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("value").get)
   }
 
@@ -770,6 +770,26 @@ class ParserSpec extends UnitSpec {
     assert(2==s.getBranches("stmts").size)
     assertNodeIs("localVarDecl",Map[String,String]("name"->"a"),s.getBranches("stmts").head);
     assertNodeIs("localVarDecl",Map[String,String]("name"->"b"),s.getBranches("stmts").tail.head);
+  }
+
+  it should "parse if without else" in {
+    var s = parseStmt("if (1) return 2;")
+    assertNodeIs("ifStmt",Map[String,String](),s)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("condition").get)
+    assertNodeIs("returnStmt",Map[String,String](),s.getBranch("then").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),s.getBranch("then").get.getBranch("value").get)
+    assert(false==s.hasBranch("else"))
+  }
+
+  it should "parse if with else" in {
+    var s = parseStmt("if (1) return 2; else return 3;")
+    assertNodeIs("ifStmt",Map[String,String](),s)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("condition").get)
+    assertNodeIs("returnStmt",Map[String,String](),s.getBranch("then").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),s.getBranch("then").get.getBranch("value").get)
+    assertNodeIs("returnStmt",Map[String,String](),s.getBranch("else").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"3"),s.getBranch("else").get.getBranch("value").get)
+
   }
 
 }

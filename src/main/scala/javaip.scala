@@ -76,6 +76,7 @@ object JavaIP {
       "null",
       "byte","int", "char", "short", "long", "float", "double", "void",
       "do", "while", "for", "switch", "case", "break", "return", "throw",
+      "if","else",
       "import",
       "class","interface",
       "private","protected","public",
@@ -386,7 +387,7 @@ object JavaIP {
       token(";")
     }
 
-    val returnStatement = rule("returnStatement"){
+    val returnStmt = rule("returnStmt"){
       sequence(
         token("return"),
         branch("value",exp),
@@ -417,14 +418,29 @@ object JavaIP {
       )
     }
 
+    val ifStmt : NamedRule = rule("ifStmt") {
+      sequence(
+        token("if"),
+        token("("),
+        branch("condition",exp),
+        token(")"),
+        branch("then",statement),
+        optional(sequence(
+          token("else"),
+          branch("else",statement)
+        ))
+      )
+    }
+
     val statement : NamedRule = subrule("statement") {
       choice(
         expressionStatement,
         emptyStatement,
         assignment,
-        returnStatement,
+        returnStmt,
         localVarDecl,
-        blockStmt)
+        blockStmt,
+        ifStmt)
     }
 
   }.syntax
