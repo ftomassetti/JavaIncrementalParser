@@ -336,7 +336,6 @@ object JavaIP {
         ),
         token("{"),
         branch("members",zeroOrMore(memberDecl)),
-        token("}"),
         recover(token("}"), "class must end with '}'")
       )
     }
@@ -361,7 +360,7 @@ object JavaIP {
     val compilationUnit = rule("compilationUnit").main {
       sequence(
         branch("imports",zeroOrMore(importDir)),
-        branch("classDeclaration",javaClass)
+        zeroOrMore(branch("classDeclaration",javaClass))
       )
     }
 

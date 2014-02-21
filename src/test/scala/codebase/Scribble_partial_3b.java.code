@@ -1,0 +1,23 @@
+// This example is from the book _Java in a Nutshell_ by David Flanagan.
+// Written by David Flanagan.  Copyright (c) 1996 O'Reilly & Associates.
+// You may study, use, modify, and distribute this example for any purpose.
+// This example is provided WITHOUT WARRANTY either expressed or implied.
+
+import java.applet.*;
+import java.awt.*;
+
+public class Scribble extends Applet {
+    private int last_x = 0;
+    private int last_y = 0;
+    private Color current_color = Color.black;
+    private Button clear_button;
+    private Choice color_choices;
+
+    // Called to initialize the applet.
+    public void init() {
+        // Set the background color
+        this.setBackground(Color.white);
+
+    }
+
+}

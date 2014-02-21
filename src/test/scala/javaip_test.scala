@@ -229,7 +229,7 @@ class ParserSpec extends UnitSpec {
     assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
   }
 
-  it should "parse a method declaration with void return type" in {
+    it should "parse a method declaration with void return type" in {
     val code = "class A { void foo(){} }"
     val lexer = JavaIP.lexer
     val syntax = JavaIP.syntax(lexer)
@@ -758,7 +758,7 @@ class ParserSpec extends UnitSpec {
     assertNodeIs("blockStmt",Map[String,String](),s)
     assert(0==s.getBranches("stmts").size)
 
-    // without closing semicolon
+    // without closing semicolonbranch("then",statement),
     s = parseStmt("{}")
     assertNodeIs("blockStmt",Map[String,String](),s)
     assert(0==s.getBranches("stmts").size)
