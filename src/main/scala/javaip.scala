@@ -385,8 +385,22 @@ object JavaIP {
       )
     }
 
+    val localVarDecl = rule("localVarDecl") {
+      sequence(
+        branch("type",typeUsage),
+        capture("name", token("identifier")),
+        optional(
+          sequence(
+            token("="),
+            branch("initializationValue",exp)
+          )
+        ),
+        token(";").permissive
+      )
+    }
+
     val statement = subrule("statement") {
-      choice(expressionStatement,emptyStatement,assignment,returnStatement)
+      choice(expressionStatement,emptyStatement,assignment,returnStatement,localVarDecl)
     }
 
   }.syntax

@@ -703,4 +703,16 @@ class ParserSpec extends UnitSpec {
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("value").get)
   }
 
+  it should "parse variable declaration statement without initialization" in {
+    val s = parseStmt("int a;")
+    assertNodeIs("localVarDecl",Map[String,String]("name"->"a"),s);
+    assert(false==s.hasBranch("initializationValue"))
+  }
+
+  it should "parse variable declaration statement with initialization" in {
+    val s = parseStmt("int a = 1;")
+    assertNodeIs("localVarDecl",Map[String,String]("name"->"a"),s);
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("initializationValue").get)
+  }
+
 }
