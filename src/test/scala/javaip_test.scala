@@ -752,4 +752,24 @@ class ParserSpec extends UnitSpec {
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
   }
 
+  it should "parse empty block stmt" in {
+    // with closing semicolon
+    var s = parseStmt("{};")
+    assertNodeIs("blockStmt",Map[String,String](),s)
+    assert(0==s.getBranches("stmts").size)
+
+    // without closing semicolon
+    s = parseStmt("{}")
+    assertNodeIs("blockStmt",Map[String,String](),s)
+    assert(0==s.getBranches("stmts").size)
+  }
+
+  it should "parse block stmt with children" in {
+    var s = parseStmt("{int a; int b;};")
+    assertNodeIs("blockStmt",Map[String,String](),s)
+    assert(2==s.getBranches("stmts").size)
+    assertNodeIs("localVarDecl",Map[String,String]("name"->"a"),s.getBranches("stmts").head);
+    assertNodeIs("localVarDecl",Map[String,String]("name"->"b"),s.getBranches("stmts").tail.head);
+  }
+
 }

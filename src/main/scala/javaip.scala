@@ -65,7 +65,8 @@ object JavaIP {
     )
 
     terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",".",",",
-      "&&","||","+=","-=","*=","/=",
+      "&&","||",
+      "+=","-=","*=","/=",
       "==","!=","<=",">=","<",">",
       "=","&","|","[","]",
       "//","/*","*/")
@@ -407,8 +408,23 @@ object JavaIP {
       )
     }
 
-    val statement = subrule("statement") {
-      choice(expressionStatement,emptyStatement,assignment,returnStatement,localVarDecl)
+    val blockStmt : NamedRule = rule("blockStmt") {
+      sequence(
+        token("{"),
+        zeroOrMore(branch("stmts",statement)),
+        token("}"),
+        optional(token(";"))
+      )
+    }
+
+    val statement : NamedRule = subrule("statement") {
+      choice(
+        expressionStatement,
+        emptyStatement,
+        assignment,
+        returnStatement,
+        localVarDecl,
+        blockStmt)
     }
 
   }.syntax
