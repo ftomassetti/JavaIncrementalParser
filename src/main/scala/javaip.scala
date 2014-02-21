@@ -86,6 +86,66 @@ object JavaIP {
     import syntax._
     import Rule._
 
+    // Expressions start
+
+    val integerLiteral = rule("integerLiteral") {
+      capture("value",token("integer"))
+    }
+
+    val thisReference = rule("thisReference") {
+      token("this")
+    }
+
+    val variableReference = rule("variableReference") {
+      capture("name",token("identifier"))
+    }
+
+    val expElement = subrule("expElement") {
+      choice(
+        integerLiteral,
+        variableReference,
+        thisReference
+      )
+    }
+
+    val expComp : NamedRule = rule("expression") {
+      val rule =
+        expression(branch("operand", expElement))
+
+      group(rule, "(", ")")
+      postfix(rule, "%", 1)
+      prefix(rule, "+", 2)
+      prefix(rule, "-", 2)
+      infix(rule, "*", 3)
+      infix(rule, "/", 3, rightAssociativity = true)
+      infix(rule, "+", 4)
+      infix(rule, "-", 4)
+
+      rule
+    }
+
+    val fieldAccess = rule("fieldAccess") {
+      sequence(
+        branch("container",expComp),
+        token("."),
+        capture("fieldName",token("identifier"))
+      )
+    }
+
+    val functionCall = rule("functionCall"){
+      sequence(
+        capture("name",token("identifier")),
+        token("("),
+        zeroOrMore(branch("actualParams",exp),separator = token(",")),
+        token(")"))
+    }
+
+    val exp : Rule = subrule("expUsage") {
+      choice(fieldAccess,functionCall,expComp)
+    }
+
+    // Expressions end
+
     val accessQualifier = rule("accessQualifier") {
       capture("name",choice(
         token("public"),
@@ -252,26 +312,6 @@ object JavaIP {
       )
     }
 
-    val integerLiteral = rule("integerLiteral") {
-      capture("value",token("integer"))
-    }
-
-    val thisReference = rule("thisReference") {
-      token("this")
-    }
-
-    val variableReference = rule("variableReference") {
-      capture("name",token("identifier"))
-    }
-
-    val expElement = subrule("expElement") {
-      choice(
-        integerLiteral,
-        variableReference,
-        thisReference
-      )
-    }
-
     val expressionStatement = rule("expressionStatement"){
       sequence(
         branch("expression",exp),
@@ -287,41 +327,7 @@ object JavaIP {
       choice(expressionStatement,emptyStatement)
     }
 
-    val expComp : NamedRule = rule("expression") {
-      val rule =
-        expression(branch("operand", expElement))
 
-      group(rule, "(", ")")
-      postfix(rule, "%", 1)
-      prefix(rule, "+", 2)
-      prefix(rule, "-", 2)
-      infix(rule, "*", 3)
-      infix(rule, "/", 3, rightAssociativity = true)
-      infix(rule, "+", 4)
-      infix(rule, "-", 4)
-
-      rule
-    }
-
-    val fieldAccess = rule("fieldAccess") {
-      sequence(
-        branch("container",expComp),
-        token("."),
-        capture("fieldName",token("identifier"))
-      )
-    }
-
-    val functionCall = rule("functionCall"){
-      sequence(
-        capture("name",token("identifier")),
-        token("("),
-        zeroOrMore(branch("actualParams",exp),separator = token(",")),
-        token(")"))
-    }
-
-    val exp : Rule = subrule("expUsage") {
-      choice(fieldAccess,expComp,functionCall)
-    }
 
   }.syntax
 }
