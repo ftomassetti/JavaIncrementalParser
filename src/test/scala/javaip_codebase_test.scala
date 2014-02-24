@@ -1,20 +1,11 @@
 import codemodels.incrementalparsers.javaip.{PapaCarloUnitSpec, JavaIP}
-import name.lakhin.eliah.projects.papacarlo.syntax.Node
 
-import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
-Contextualizer, Token}
-import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
-import name.lakhin.eliah.projects.papacarlo.syntax.Rule
 import name.lakhin.eliah.projects.papacarlo.syntax.Node
-import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
 import name.lakhin.eliah.projects.papacarlo.test.utils.ErrorMonitor
-import scala.collection.mutable
-
-import org.scalatest._
 
 class javaip_codebase_test extends PapaCarloUnitSpec {
 
- /* it should "parse typical compilation unit " in {
+ it should "parse typical compilation unit " in {
     val code = """
                  // This example is from the book _Java in a Nutshell_ by David Flanagan.
                  // Written by David Flanagan.  Copyright (c) 1996 O'Reilly & Associates.
@@ -115,5 +106,5 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     lexer.input(code)
     assert(0==syntax.getErrors.size)
   }
-*/
+
 }

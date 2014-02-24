@@ -149,12 +149,11 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse a method declaration with primitive return type" in {
-    val m = parseAndGetMethod("int foo(){}")
-    println(m.prettyPrint())
-    assert("foo"==getValue(m,"name"))
+    val m = parseAndGetMethod("int fooz(){}")
+    assert("fooz"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"returnType"))
   }
-/*
+
   it should "parse a field declaration with primitive type" in {
     val m = parseAndGetField("int foo;")
     assert("foo"==getValue(m,"name"))
@@ -297,7 +296,7 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse function call without args" in {
-    val m = parseAndGetMethod("int foo = baz();")
+    val m = parseAndGetField("int foo = baz();")
     val v = getBranch(m,"initializationValue")
     assertNodeIs("functionCall",Map[String,String]("name"->"baz"),v)
     assert(0==getBranches(v,"params").size)
@@ -395,12 +394,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     // with closing semicolon
     var s = parseStmt("{};")
     assertNodeIs("blockStmt",Map[String,String](),s)
-    assert(0==s.getBranches("stmts").size)
+    assert(0==getBranches(s,"stmts").size)
 
     // without closing semicolonbranch("then",statement),
     s = parseStmt("{}")
     assertNodeIs("blockStmt",Map[String,String](),s)
-    assert(0==s.getBranches("stmts").size)
+    assert(0==getBranches(s,"stmts").size)
   }
 
   it should "parse block stmt with children" in {
@@ -429,5 +428,5 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("returnStmt",Map[String,String](),getBranches(s,"else").head)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"3"),getBranch(getBranches(s,"else").head,"value"))
   }
-*/
+
 }

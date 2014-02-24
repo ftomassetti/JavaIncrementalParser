@@ -44,15 +44,12 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
     return classes
   }
 
-  def parseAndGetMember(code : String) : Node = {
-    val code = "class A { void foo(){} }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
+  def parseAndGetMember(memberCode : String) : Node = {
+    val code = "class A { "+memberCode+" }"
     var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
+    parse(code,node => {
       members = getBranch(node,"classDeclaration").getBranches.get("members").get
-    }}
-    lexer.input(code)
+    })
     assert(1==members.size)
     return members.head
   }
@@ -92,13 +89,14 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
   def assertIsPrimitive(name:String,node: Node,arrayLevel: Int = 0) {
     assert(arrayLevel==getBranches(node,"array").size)
     assert("primitiveType"==getBranch(node,"baseType").getKind,"It is not a primitive type: "+node.prettyPrint())
-    assert(name==node.getBranches.get("baseType").get.head.getValues.get("name").get)
+    assert(name==getValue(getBranch(node,"baseType"),"name"))
   }
 
   def assertIsClass(name:String,node: Node,arrayLevel: Int = 0) {
-    assert(arrayLevel==node.getBranches("array").size)
-    assert("classType"==node.getBranches.get("baseType").get.head.getKind)
-    assert(name==node.getBranches.get("baseType").get.head.getValues.get("name").get)
+    assert(arrayLevel==getBranches(node,"array").size)
+    val baseType = getBranch(node,"baseType")
+    assert("classType"==baseType.getKind)
+    assert(name==getValue(baseType,"name"))
   }
 
   def assertQualId(parts:List[String],node: Node) {
@@ -108,7 +106,7 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
 
   def assertNodeIs(kind:String,values:Map[String,String],node:Node){
     assert(kind==node.getKind)
-    values.foreach { case (key,value)=> assert(value==node.getValues.get(key).value,"Value of "+key+" expected to be "+value+". Node: "+node.prettyPrint()) }
+    values.foreach { case (key,value)=> assert(value==getValue(node,key),"Value of "+key+" expected to be "+value+". Node: "+node.prettyPrint()) }
   }
 
   def assertAccessQualifier(name:String,node: Node){
@@ -159,7 +157,7 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
 
   def assertAbstractQualifier(node: Node) {
     assert(hasBranch(node,"qualifiers"),"node "+node.prettyPrint()+" has not qualifiers branches")
-    assert(None!=getBranches(node,"qualifiers").find(q => hasBranch(q,"abstract") && "abstract"==getValue(getBranch(q,"abstract"),"abstract")),"Abstract qualifier not found for "+node.prettyPrint())
+    assert(None!=getBranches(node,"qualifiers").find(q => hasValue(q,"abstract") && "abstract"==getValue(q,"abstract")),"Abstract qualifier not found for "+node.prettyPrint())
   }
 
   def assertStaticQualifier(node: Node) {
