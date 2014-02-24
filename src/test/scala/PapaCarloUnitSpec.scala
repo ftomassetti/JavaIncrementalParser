@@ -2,6 +2,7 @@ package codemodels.incrementalparsers.javaip
 
 import name.lakhin.eliah.projects.papacarlo.syntax.Node
 import org.scalatest._
+import name.lakhin.eliah.projects.papacarlo.test.utils.ErrorMonitor
 
 abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
   OptionValues with Inside with Inspectors {
@@ -13,7 +14,9 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
     syntax.onNodeMerge.bind {node => {
       f(node)
     }}
+    val m = new ErrorMonitor(lexer,syntax)
     lexer.input(code)
+    assert(0==syntax.getErrors.size,"There are syntax errors: "+m.getResult+". Code parsed '"+code+"'")
   }
 
   def parseAndGetClassesList(code : String) : List[Node] = {
@@ -64,17 +67,14 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
 
   def parseStmt(stmtCode : String) : Node = {
     val code = "class A { void foo(){"+stmtCode+"} }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
     var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranches.get("classDeclaration").get.head.getBranches.get("members").get
-    }}
-    lexer.input(code)
+    parse(code,node => {
+      members = getBranches(getBranch(node,"classDeclaration"),"members")
+    })
 
     assert(1==members.size)
     val m : Node = members.head.getBranches.get("method").get.head
-    assert(1==m.getBranches.get("stmts").size)
+    assert(1==m.getBranches.get("stmts").size,"No statement parsed, maybe there are parsing errors?")
     val s = m.getBranches.get("stmts").get.head
     return s
   }

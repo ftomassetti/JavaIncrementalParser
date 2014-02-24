@@ -429,4 +429,22 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("integerLiteral",Map[String,String]("value"->"3"),getBranch(getBranches(s,"else").head,"value"))
   }
 
+  it should "parse assignement of this" in {
+    var e = parseExpr("this")
+    println(e.prettyPrint())
+    assertNodeIs("thisReference",Map[String,String](),e)
+  }
+
+  it should "parse method call on this without params" in {
+    var e = parseExpr("this.setBackground()")
+    println(e.prettyPrint())
+    assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
+  }
+
+  it should "parse method call on this with a param" in {
+    var e = parseExpr("this.setBackground(Color.white)")
+    println(e.prettyPrint())
+    assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
+  }
+
 }

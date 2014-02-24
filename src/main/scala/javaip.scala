@@ -174,8 +174,12 @@ object JavaIP {
       )
     }
 
-    val functionCall = rule("functionCall"){
+    val methodCall = rule("functionCall"){
       sequence(
+        optional(sequence(
+          branch("target",expComp),
+          token(".")
+        )),
         capture("name",token("identifier")),
         token("("),
         zeroOrMore(branch("actualParams",exp),separator = token(",")),
@@ -188,13 +192,12 @@ object JavaIP {
         branch("className",qualifiedIdentifier),
         token("("),
         zeroOrMore(branch("actualParams",exp),separator = token(",")),
-        token(")"),
-        optional(token(";"))
+        token(")")
       )
     }
 
     val exp : Rule = subrule("expUsage") {
-      choice(fieldAccess,functionCall,expComp,instantiation)
+      choice(fieldAccess,methodCall,expComp,instantiation)
     }
 
     // Expressions end
@@ -289,14 +292,15 @@ object JavaIP {
           separator = token(",")
         ),
         token(")"),
-        optional(
+        choice(
+          token(";"),
           sequence(
             token("{"),
             zeroOrMore(branch("stmts",statement)),
-            token("}")
+            token("}"),
+            optional(token(";"))
           )
-        ),
-        optional(token(";"))
+        )
       )
     }
 
