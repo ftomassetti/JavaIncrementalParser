@@ -10,10 +10,7 @@ import scala.collection.mutable
 
 import org.scalatest._
 
-abstract class UnitSpec extends FlatSpec with Matchers with
-  OptionValues with Inside with Inspectors
-
-class TokenizerSpec extends UnitSpec {
+class TokenizerSpec extends PapaCarloUnitSpec {
 
   private def check_token(kind:String,value:String,token:Token) : Unit = {
     assert(kind==token.kind,"kind is wrong")
@@ -84,90 +81,7 @@ class TokenizerSpec extends UnitSpec {
 
 }
 
-class ParserSpec extends UnitSpec {
-
-  // Helper methods : parsing
-
-  def parse(code : String, f : Node => Any) {
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    syntax.onNodeMerge.bind {node => {
-      f(node)
-    }}
-    lexer.input(code)
-  }
-
-  def parseAndGetClassesList(code : String) : List[Node] = {
-    var classes = List[Node]()
-    parse(code,node => {
-      val classNode = node.getBranch("classDeclaration").get
-      classes ::= classNode
-    })
-    return classes
-  }
-
-  def parseAndGetClassesMap(code : String) : Map[String,Node] = {
-    var classes = Map[String,Node]()
-    parse(code,node => {
-      val classNode = node.getBranch("classDeclaration").get
-      classes += (classNode.getValue("name") -> classNode)
-    })
-    return classes
-  }
-
-  def parseStmt(stmtCode : String) : Node = {
-    val code = "class A { void foo(){"+stmtCode+"} }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-      syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-    val m = members.head.getBranch("method").get
-    assert(1==m.getBranches("stmts").size)
-    val s = m.getBranches("stmts").head
-    return s
-  }
-
-  def parseExpr(exprCode : String) : Node = {
-    val s = parseStmt("a = "+exprCode+";")
-    return s.getBranch("value").get
-  }
-
-  // Helper methods : assert
-
-  def assertIsPrimitive(name:String,node: Node,arrayLevel: Int = 0) {
-    assert(arrayLevel==node.getBranches("array").size)
-    assert("primitiveType"==node.getBranch("baseType").get.getKind)
-    assert(name==node.getBranch("baseType").get.getValue("name"))
-  }
-
-  def assertIsClass(name:String,node: Node,arrayLevel: Int = 0) {
-    assert(arrayLevel==node.getBranches("array").size)
-    assert("classType"==node.getBranch("baseType").get.getKind)
-    assert(name==node.getBranch("baseType").get.getValue("name"))
-  }
-
-  def assertQualId(parts:List[String],node: Node) {
-    assert("qualifiedIdentifier"==node.getKind)
-    assert(parts==node.getValues("part").reverse)
-  }
-
-  def assertNodeIs(kind:String,values:Map[String,String],node:Node){
-    assert(kind==node.getKind)
-    values.foreach { case (key,value)=> assert(value==node.getValue(key),"Value of "+key+" expected to be "+value+". Node: "+node.prettyPrint()) }
-  }
-
-  def assertAccessQualifier(name:String,node: Node){
-    assert(name==node.getBranch("qualifiers").get.getBranch("access").get.getValue("name"))
-  }
-
-  def assertAbstractQualifier(node: Node){
-    assert("abstract"==node.getBranch("qualifiers").get.getValue("abstract"))
-  }
+class ParserSpec extends PapaCarloUnitSpec {
 
   // Tests
 
@@ -175,7 +89,7 @@ class ParserSpec extends UnitSpec {
     var classes = parseAndGetClassesList("class A { }")
 
     assert(1==classes.size)
-    assert("A"==classes.head.getValue("name"))
+    assert("A"==getValue(classes.head,"name"))
   }
 
   it should "parse a basic class with qualifiers" in {
@@ -183,9 +97,10 @@ class ParserSpec extends UnitSpec {
 
     assert(1==classes.size)
     assert(classes contains "A")
-    assert(2==classes.get("A").get.getBranches("qualifiers").size)
-    assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
-    assertAccessQualifier("public",classes.get("A").get)
+    val c = classes.get("A").get
+    assert(2==c.getBranches("qualifiers").size)
+    assertStaticQualifier(c)
+    assertAccessQualifier("public",c)
   }
 
   it should "parse a basic class with comments" in {
@@ -193,9 +108,10 @@ class ParserSpec extends UnitSpec {
 
     assert(1==classes.size)
     assert(classes contains "A")
-    assert(2==classes.get("A").get.getBranches("qualifiers").size)
-    assert(1==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
-    assertAccessQualifier("public",classes.get("A").get)
+    val c = classes.get("A").get
+    assert(2==c.getBranches("qualifiers").size)
+    assertStaticQualifier(c)
+    assertAccessQualifier("public",c)
   }
 
   it should "parse import directives" in {
@@ -207,9 +123,9 @@ class ParserSpec extends UnitSpec {
     var classes = Map[String,Node]()
     var imports = List[Node]()
     syntax.onNodeMerge.bind {node => {
-      imports = node.getBranches("imports")
-      val classNode = node.getBranch("classDeclaration").get
-      classes += (classNode.getValue("name") -> classNode)
+      imports = getBranches(node,"imports")
+      val classNode = getBranch(node,"classDeclaration")
+      classes += (getValue(classNode,"name") -> classNode)
     }}
     lexer.input(code)
 
@@ -222,474 +138,197 @@ class ParserSpec extends UnitSpec {
 
     assert(1==classes.size)
     assert(classes contains "A")
-    assert(0==classes.get("A").get.getBranches("qualifiers").size)
-    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasValue("static")).size)
-    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("public")).size)
-    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("protected")).size)
-    assert(0==classes.get("A").get.getBranches("qualifiers").filter(n => n.hasBranch("access") && n.getBranch("access").get.hasValue("private")).size)
+    val c = classes.get("A").get
+    assert(0==getBranches(c,"qualifiers").size)
   }
 
-    it should "parse a method declaration with void return type" in {
-    val code = "class A { void foo(){} }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var methods = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      val members = node.getBranch("classDeclaration").get.getBranches("members")
-      methods = members
-    }}
-    lexer.input(code)
-
-    assert(1==methods.size)
-    val m = methods.head
-    assert("foo"==m.getBranch("method").get.getValue("name"))
-    assert("voidType"==m.getBranch("method").get.getBranch("returnType").get.getKind)
+  it should "parse a method declaration with void return type" in {
+    val m = parseAndGetMethod("void foo(){}")
+    assert("foo"==getValue(m,"name"))
+    assert("voidType"==getBranch(m,"returnType").getKind)
   }
 
   it should "parse a method declaration with primitive return type" in {
-    val code = "class A { int foo(){} }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var methods = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      val members = node.getBranch("classDeclaration").get.getBranches("members")
-      methods = members
-    }}
-    lexer.input(code)
-
-    assert(1==methods.size)
-    val m = methods.head
-    assert("foo"==m.getBranch("method").get.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("method").get.getBranch("returnType").get)
+    val m = parseAndGetMethod("int foo(){}")
+    println(m.prettyPrint())
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"returnType"))
   }
-
+/*
   it should "parse a field declaration with primitive type" in {
-    val code = "class A { int foo; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-    val m = members.head
-    assert("foo"==m.getBranch("field").get.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("field").get.getBranch("type").get)
+    val m = parseAndGetField("int foo;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
   }
 
   it should "parse a field declaration with qualifiers" in {
-    val code = "class A { private int foo; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-    val m = members.head.getBranch("field").get
+    val m = parseAndGetField("private int foo;")
     assertAccessQualifier("private",m)
-    assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
   }
 
   it should "parse a field declaration with array type" in {
-    val code = "class A { int[] foo; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-    val m = members.head
-    assert("foo"==m.getBranch("field").get.getValue("name"))
-
-    assertIsPrimitive("int",m.getBranch("field").get.getBranch("type").get,1)
+    val m = parseAndGetField("int[] foo;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"),1)
   }
 
   it should "parse a field declaration with triple array type" in {
-    val code = "class A { int[][][] foo; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-    val m = members.head
-    assert("foo"==m.getBranch("field").get.getValue("name"))
-
-    assertIsPrimitive("int",m.getBranch("field").get.getBranch("type").get,3)
+    val m = parseAndGetField("int[][][] foo;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"),3)
   }
 
   it should "parse method parameters" in {
-    val code = "class A { void baz(int a,String b){} }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-    val m = members.head.getBranch("method").get
+    val m = parseAndGetMethod("void baz(int a,String b){}")
     val p1 = m.getBranches("params").head
     val p2 = m.getBranches("params").tail.head
-    assert("a"==p1.getValue("name"))
-    assertIsPrimitive("int",p1.getBranch("type").get)
-    assert("b"==p2.getValue("name"))
-    assertIsClass("String",p2.getBranch("type").get)
+    assert("a"==getValue(p1,"name"))
+    assertIsPrimitive("int",getBranch(p1,"type"))
+    assert("b"==getValue(p2,"name"))
+    assertIsClass("String",getBranch(p2,"type"))
   }
 
   it should "parse class extends clause" in {
-    val code = "class A extends B {}"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var classes = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      classes = node.getBranches("classDeclaration")
-    }}
-    lexer.input(code)
-
-    assert(1==classes.size)
-    val c = classes.head
-    assertQualId(List("B"),c.getBranch("baseClass").get)
+    var c = parseAndGetClass("class A extends B {}")
+    assertQualId(List("B"),getBranch(c,"baseClass"))
   }
 
   it should "parse qualified identifier" in {
-    val code = "class A extends B.C.D {}"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var classes = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      classes = node.getBranches("classDeclaration")
-    }}
-    lexer.input(code)
-
-    assert(1==classes.size)
-    val c = classes.head
-    assertQualId(List("B","C","D"),c.getBranch("baseClass").get)
+    var c = parseAndGetClass("class A extends B.C.D {}")
+    assertQualId(List("B","C","D"),getBranch(c,"baseClass"))
   }
 
   it should "parse class implements clause" in {
-    val code = "class A implements C, D {}"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var classes = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      classes = node.getBranches("classDeclaration")
-    }}
-    lexer.input(code)
-
-    assert(1==classes.size)
-    val c = classes.head
-    assert(2==c.getBranches("interfaces").size)
-    val i1 = c.getBranches("interfaces").head
-    val i2 = c.getBranches("interfaces").tail.head
+    var c = parseAndGetClass("class A implements C, D {}")
+    assert(2==getBranches(c,"interfaces").size)
+    val i1 = getBranches(c,"interfaces").head
+    val i2 = getBranches(c,"interfaces").tail.head
     assertQualId(List("C"),i1)
     assertQualId(List("D"),i2)
   }
 
   it should "parse class extends and implements clause" in {
-    val code = "class A extends B implements C, D {}"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var classes = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      classes = node.getBranches("classDeclaration")
-    }}
-    lexer.input(code)
-
-    assert(1==classes.size)
-    val c = classes.head
-    assert(2==c.getBranches("interfaces").size)
-    val bc = c.getBranch("baseClass").get
-    val i1 = c.getBranches("interfaces").head
-    val i2 = c.getBranches("interfaces").tail.head
+    var c = parseAndGetClass("class A extends B implements C, D {}")
+    assert(2==getBranches(c,"interfaces").size)
+    val bc = getBranch(c,"baseClass")
+    val i1 = getBranches(c,"interfaces").head
+    val i2 = getBranches(c,"interfaces").tail.head
     assertQualId(List("B"),bc)
     assertQualId(List("C"),i1)
     assertQualId(List("D"),i2)
   }
 
   it should "parse a field declaration with initializer" in {
-    val code = "class A { int foo = 1; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get)
+    var m = parseAndGetField("int foo = 1;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(m,"initializationValue"))
   }
 
   it should "parse sum expression" in {
-    val code = "class A { int foo = 1+2; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("+",Map[String,String](),m.getBranch("initializationValue").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),m.getBranch("initializationValue").get.getBranch("right").get)
+    var m = parseAndGetField("int foo = 1+2;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
+    assertNodeIs("+",Map[String,String](),getBranch(m,"initializationValue"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranch(m,"initializationValue"),"right"))
   }
 
   it should "parse subtraction expression" in {
-    val code = "class A { int foo = 1-2; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("-",Map[String,String](),m.getBranch("initializationValue").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),m.getBranch("initializationValue").get.getBranch("right").get)
+    val m = parseAndGetField("int foo = 1-2;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
+    assertNodeIs("-",Map[String,String](),getBranch(m,"initializationValue"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranch(m,"initializationValue"),"right"))
   }
 
   it should "parse multiplication expression" in {
-    val code = "class A { int foo = 1*2; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("*",Map[String,String](),m.getBranch("initializationValue").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),m.getBranch("initializationValue").get.getBranch("right").get)
+    val m = parseAndGetField("int foo = 1*2;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
+    assertNodeIs("*",Map[String,String](),getBranch(m,"initializationValue"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranch(m,"initializationValue"),"right"))
   }
 
   it should "parse division expression" in {
-    val code = "class A { int foo = 1/2; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("/",Map[String,String](),m.getBranch("initializationValue").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),m.getBranch("initializationValue").get.getBranch("right").get)
+    val m = parseAndGetField("int foo = 1/2;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
+    assertNodeIs("/",Map[String,String](),getBranch(m,"initializationValue"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranch(m,"initializationValue"),"right"))
   }
 
   it should "parse variable reference expression" in {
-    val code = "class A { int foo = a; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("variableReference",Map[String,String]("name"->"a"),m.getBranch("initializationValue").get)
+    val m = parseAndGetField("int foo = a;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
+    assertNodeIs("variableReference",Map[String,String]("name"->"a"),getBranch(m,"initializationValue"))
   }
 
   it should "parse field access expression" in {
-    val code = "class A { int foo = 1 . a; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    assert("foo"==m.getValue("name"))
-    assertIsPrimitive("int",m.getBranch("type").get)
-    assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"a"),m.getBranch("initializationValue").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),m.getBranch("initializationValue").get.getBranch("container").get)
+    val m = parseAndGetField("int foo = 1 . a;")
+    assert("foo"==getValue(m,"name"))
+    assertIsPrimitive("int",getBranch(m,"type"))
+    assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"a"),getBranch(m,"initializationValue"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"container"))
   }
 
   it should "parse abstract class" in {
-    val code = "abstract class A { }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var classes = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      classes ::= node.getBranch("classDeclaration").get
-    }}
-    lexer.input(code)
-
-    assert(1==classes.size)
-    val c = classes.head
+    val c = parseAndGetClass("abstract class A { }")
     assertAbstractQualifier(c)
   }
 
   it should "parse abstract method" in {
-    val code = "abstract class A { abstract void foo(); }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-    val m = members.head.getBranch("method").get
+    val m = parseAndGetMethod("abstract void foo();")
+    assertAbstractQualifier(m)
   }
 
   it should "parse this ref" in {
-    val code = "class A { void foo(){ this; } }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-    val m = members.head.getBranch("method").get
+    val m = parseAndGetMethod("void foo(){ this; }")
     assert(1==m.getBranches("stmts").size)
     val s = m.getBranches("stmts").head
     assertNodeIs("expressionStatement",Map[String,String](),s);
-    assertNodeIs("thisReference",Map[String,String](),s.getBranch("expression").get);
+    assertNodeIs("thisReference",Map[String,String](),getBranch(s,"expression"))
   }
 
   it should "parse function call without args" in {
-    val code = "class A { int foo = baz(); }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    val v = m.getBranch("initializationValue").get
+    val m = parseAndGetMethod("int foo = baz();")
+    val v = getBranch(m,"initializationValue")
     assertNodeIs("functionCall",Map[String,String]("name"->"baz"),v)
-    assert(0==v.getBranches("params").size)
+    assert(0==getBranches(v,"params").size)
   }
 
   it should "parse function call with args" in {
-    val code = "class A { int foo = baz(1,2); }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    val v = m.getBranch("initializationValue").get
+    val m = parseAndGetField("int foo = baz(1,2);")
+    val v = getBranch(m,"initializationValue")
     assertNodeIs("functionCall",Map[String,String]("name"->"baz"),v)
-    assert(2==v.getBranches("actualParams").size)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),v.getBranches("actualParams").head)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),v.getBranches("actualParams").tail.head)
+    assert(2==getBranches(v,"actualParams").size)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranches(v,"actualParams").head)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranches(v,"actualParams").tail.head)
   }
 
   it should "parse string literal" in {
-    val code = "class A { int foo = \"ciao\"; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    val v = m.getBranch("initializationValue").get
+    val m = parseAndGetField("int foo = \"ciao\";")
+    val v = getBranch(m,"initializationValue")
     assertNodeIs("stringLiteral",Map[String,String]("value"->"\"ciao\""),v)
   }
 
   it should "parse char literal" in {
-    val code = "class A { int foo = 'a'; }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    val v = m.getBranch("initializationValue").get
+    val m = parseAndGetField("int foo = 'a';")
+    val v = getBranch(m,"initializationValue")
     assertNodeIs("charLiteral",Map[String,String]("value"->"'a'"),v)
   }
 
   it should "parse instantiation of qualified class name with args" in {
-    val code = "class A { int foo = new fooz.Baz(1,2); }"
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    var members = List[Node]()
-    syntax.onNodeMerge.bind {node => {
-      members = node.getBranch("classDeclaration").get.getBranches("members")
-    }}
-    lexer.input(code)
-
-    assert(1==members.size)
-
-    val m = members.head.getBranch("field").get
-    val v = m.getBranch("initializationValue").get
+    val m = parseAndGetField("int foo = new fooz.Baz(1,2);")
+    val v = getBranch(m,"initializationValue")
     assertNodeIs("instantiation",Map[String,String](),v)
-    assertQualId(List[String]("fooz","Baz"),v.getBranch("className").get)
+    assertQualId(List[String]("fooz","Baz"),getBranch(v,"className"))
     assert(2==v.getBranches("actualParams").size)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),v.getBranches("actualParams").head)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),v.getBranches("actualParams").tail.head)
@@ -698,58 +337,58 @@ class ParserSpec extends UnitSpec {
   it should "parse assignment" in {
     val s = parseStmt("a.b = 1;")
     assertNodeIs("assignment",Map[String,String](),s);
-    assertQualId(List[String]("a","b"),s.getBranch("assigned").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("value").get)
+    assertQualId(List[String]("a","b"),getBranch(s,"assigned"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(s,"value"))
   }
 
   it should "parse return statement" in {
     val s = parseStmt("return 1;")
     assertNodeIs("returnStmt",Map[String,String](),s);
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("value").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(s,"value"))
   }
 
   it should "parse variable declaration statement without initialization" in {
     val s = parseStmt("int a;")
     assertNodeIs("localVarDecl",Map[String,String]("name"->"a"),s);
-    assert(false==s.hasBranch("initializationValue"))
+    assert(false==hasBranch(s,"initializationValue"))
   }
 
   it should "parse variable declaration statement with initialization" in {
     val s = parseStmt("int a = 1;")
     assertNodeIs("localVarDecl",Map[String,String]("name"->"a"),s);
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("initializationValue").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(s,"initializationValue"))
   }
 
   it should "parse comparison" in {
     var e = parseExpr("1==2")
     assertNodeIs("==",Map[String,String](),e)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
     e = parseExpr("1!=2")
     assertNodeIs("!=",Map[String,String](),e)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
     e = parseExpr("1<2")
     assertNodeIs("<",Map[String,String](),e)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
     e = parseExpr("1>2")
     assertNodeIs(">",Map[String,String](),e)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
     e = parseExpr("1<=2")
     assertNodeIs("<=",Map[String,String](),e)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
     e = parseExpr("1>=2")
     assertNodeIs(">=",Map[String,String](),e)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),e.getBranch("left").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),e.getBranch("right").get)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
   }
 
   it should "parse empty block stmt" in {
@@ -775,21 +414,20 @@ class ParserSpec extends UnitSpec {
   it should "parse if without else" in {
     var s = parseStmt("if (1) return 2;")
     assertNodeIs("ifStmt",Map[String,String](),s)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("condition").get)
-    assertNodeIs("returnStmt",Map[String,String](),s.getBranch("then").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),s.getBranch("then").get.getBranch("value").get)
-    assert(false==s.hasBranch("else"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranches(s,"condition").head)
+    assertNodeIs("returnStmt",Map[String,String](),getBranches(s,"then").head)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranches(s,"then").head,"value"))
+    assert(false==hasBranch(s,"else"))
   }
 
   it should "parse if with else" in {
     var s = parseStmt("if (1) return 2; else return 3;")
     assertNodeIs("ifStmt",Map[String,String](),s)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),s.getBranch("condition").get)
-    assertNodeIs("returnStmt",Map[String,String](),s.getBranch("then").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),s.getBranch("then").get.getBranch("value").get)
-    assertNodeIs("returnStmt",Map[String,String](),s.getBranch("else").get)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"3"),s.getBranch("else").get.getBranch("value").get)
-
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranches(s,"condition").head)
+    assertNodeIs("returnStmt",Map[String,String](),getBranches(s,"then").head)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranches(s,"then").head,"value"))
+    assertNodeIs("returnStmt",Map[String,String](),getBranches(s,"else").head)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"3"),getBranch(getBranches(s,"else").head,"value"))
   }
-
+*/
 }

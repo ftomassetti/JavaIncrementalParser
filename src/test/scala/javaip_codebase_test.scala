@@ -1,4 +1,4 @@
-import codemodels.incrementalparsers.javaip.JavaIP
+import codemodels.incrementalparsers.javaip.{PapaCarloUnitSpec, JavaIP}
 import name.lakhin.eliah.projects.papacarlo.syntax.Node
 
 import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
@@ -12,12 +12,9 @@ import scala.collection.mutable
 
 import org.scalatest._
 
-abstract class UnitSpec extends FlatSpec with Matchers with
-OptionValues with Inside with Inspectors
+class javaip_codebase_test extends PapaCarloUnitSpec {
 
-class javaip_codebase_test extends UnitSpec {
-
-  it should "parse typical compilation unit " in {
+ /* it should "parse typical compilation unit " in {
     val code = """
                  // This example is from the book _Java in a Nutshell_ by David Flanagan.
                  // Written by David Flanagan.  Copyright (c) 1996 O'Reilly & Associates.
@@ -35,8 +32,8 @@ class javaip_codebase_test extends UnitSpec {
     var imports = List[Node]()
     syntax.onNodeMerge.bind {node => {
       imports = node.getBranches("imports")
-      val classNode = node.getBranch("classDeclaration").get
-      classes += (classNode.getValue("name") -> classNode)
+      val classNode = getBranch(node,"classDeclaration")
+      classes += (getValue(classNode,"name") -> classNode)
     }}
     lexer.input(code)
 
@@ -118,5 +115,5 @@ class javaip_codebase_test extends UnitSpec {
     lexer.input(code)
     assert(0==syntax.getErrors.size)
   }
-
+*/
 }
