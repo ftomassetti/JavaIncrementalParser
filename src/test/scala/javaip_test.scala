@@ -466,4 +466,13 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("integerLiteral",    Map[String,String]("value"->"1"),  getBranch(e,"index"))
   }
 
+  it should "parse annidated calls" in {
+    var e = parseExpr("g.setColor(this.getBackground())")
+    assertNodeIs("functionCall",Map[String,String]("name"->"setColor"),e)
+    assertNodeIs("variableReference",Map[String,String]("name"->"g"),getBranch(e,"target"))
+    assert(1==getBranches(e,"actualParams").size)
+    assertNodeIs("functionCall",Map[String,String]("name"->"getBackground"),getBranch(e,"actualParams"))
+    assertNodeIs("thisReference",Map[String,String](),getBranch(getBranch(e,"actualParams"),"target"))
+  }
+
 }
