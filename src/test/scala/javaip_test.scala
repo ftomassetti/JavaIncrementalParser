@@ -323,6 +323,16 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("charLiteral",Map[String,String]("value"->"'a'"),v)
   }
 
+  it should "parse boolean literal false" in {
+    val e = parseExpr("false")
+    assertNodeIs("booleanLiteral",Map[String,String]("value"->"false"),e)
+  }
+
+  it should "parse boolean literal true" in {
+    val e = parseExpr("true")
+    assertNodeIs("booleanLiteral",Map[String,String]("value"->"true"),e)
+  }
+
   it should "parse instantiation of qualified class name with args" in {
     val m = parseAndGetField("int foo = new fooz.Baz(1,2);")
     val v = getBranch(m,"initializationValue")
@@ -436,14 +446,12 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse method call on this without params" in {
     var e = parseExpr("this.setBackground()")
-    println(e.prettyPrint())
     assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
     assertNodeIs("thisReference",Map[String,String](),getBranch(e,"target"))
   }
 
   it should "parse method call on this with a param" in {
     var e = parseExpr("this.setBackground(Color.white)")
-    println(e.prettyPrint())
     assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
     assertNodeIs("thisReference",Map[String,String](),getBranch(e,"target"))
     assert(1==getBranches(e,"actualParams").size)
@@ -453,7 +461,6 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse array access" in {
     var e = parseExpr("foo[1]")
-    println(e.prettyPrint())
     assertNodeIs("arrayAccess",       Map[String,String](),e)
     assertNodeIs("variableReference", Map[String,String]("name"->"foo"), getBranch(e,"array"))
     assertNodeIs("integerLiteral",    Map[String,String]("value"->"1"),  getBranch(e,"index"))

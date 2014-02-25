@@ -96,6 +96,17 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
   }
 
 
+  it should "parse Scribble.java partial 4" in {
+    val filename = "src/test/scala/codebase/Scribble_partial_4.java.code"
+    val code = scala.io.Source.fromFile(filename).mkString
+
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    val m = new ErrorMonitor(lexer,syntax)
+    lexer.input(code)
+    assert(0==syntax.getErrors.size,m.getResult)
+  }
+
   it should "parse Scribble.java" in {
     val filename = "src/test/scala/codebase/Scribble.java.code"
     val code = scala.io.Source.fromFile(filename).mkString

@@ -126,6 +126,10 @@ object JavaIP {
       capture("value",token("char"))
     }
 
+    val booleanLiteral = rule("booleanLiteral") {
+      capture("value",choice(token("true"),token("false")))
+    }
+
     val thisReference = rule("thisReference") {
       token("this")
     }
@@ -139,6 +143,7 @@ object JavaIP {
         integerLiteral,
         stringLiteral,
         charLiteral,
+        booleanLiteral,
         variableReference,
         thisReference
       )
