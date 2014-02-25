@@ -431,7 +431,6 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse assignement of this" in {
     var e = parseExpr("this")
-    println(e.prettyPrint())
     assertNodeIs("thisReference",Map[String,String](),e)
   }
 
@@ -439,12 +438,25 @@ class ParserSpec extends PapaCarloUnitSpec {
     var e = parseExpr("this.setBackground()")
     println(e.prettyPrint())
     assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
+    assertNodeIs("thisReference",Map[String,String](),getBranch(e,"target"))
   }
 
   it should "parse method call on this with a param" in {
     var e = parseExpr("this.setBackground(Color.white)")
     println(e.prettyPrint())
     assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
+    assertNodeIs("thisReference",Map[String,String](),getBranch(e,"target"))
+    assert(1==getBranches(e,"actualParams").size)
+    assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"white"),getBranch(e,"actualParams"))
+    assertNodeIs("variableReference",Map[String,String]("name"->"Color"),getBranch(getBranch(e,"actualParams"),"container"))
+  }
+
+  it should "parse array access" in {
+    var e = parseExpr("foo[1]")
+    println(e.prettyPrint())
+    assertNodeIs("arrayAccess",       Map[String,String](),e)
+    assertNodeIs("variableReference", Map[String,String]("name"->"foo"), getBranch(e,"array"))
+    assertNodeIs("integerLiteral",    Map[String,String]("value"->"1"),  getBranch(e,"index"))
   }
 
 }

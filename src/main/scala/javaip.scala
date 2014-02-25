@@ -196,8 +196,17 @@ object JavaIP {
       )
     }
 
+    val arrayAccess = rule("arrayAccess"){
+      sequence(
+        branch("array",expComp),
+        token("["),
+        branch("index",exp),
+        token("]")
+      )
+    }
+
     val exp : Rule = subrule("expUsage") {
-      choice(fieldAccess,methodCall,expComp,instantiation)
+      choice(instantiation, arrayAccess, methodCall, fieldAccess, expComp)
     }
 
     // Expressions end
