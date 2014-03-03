@@ -104,8 +104,72 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
     assert(parts==node.getValues("part").reverse)
   }
 
-  def assertNodeIs(kind:String,values:Map[String,String],node:Node){
-    assert(kind==node.getKind)
+  def toExpOp(node:Node) : Node = {
+    assertNodeIs("expArrayAccess",Map[String,String](),node,"Expected an expArrayAccess(toExpOp method)")
+    assert(!hasBranch(node,"index"))
+    val node1 = getBranch(node,"value")
+    if (node1.getKind=="expAccess"){
+      assertNodeIs("expAccess",Map[String,String](),node1,"Expected an expAccess inside an expArrayAccess (toExpOp method)")
+      assert(!hasValue(node1,"name"))
+      val node2 = getBranch(node1,"value")
+      assertNodeIs("expOp",Map[String,String](),node2)
+      return node2
+    } else {
+      assert(Array("+","-","/","*").contains(node1.getKind))
+      return node1
+    }
+  }
+
+  def assertIsIntegerLiteral(value:Int, node: Node){
+    if (node.getKind=="expArrayAccess"){
+      assertNodeIs("expArrayAccess",Map[String,String](),node)
+      assert(!hasBranch(node,"index"))
+      val node1 = getBranch(node,"value")
+      return assertIsIntegerLiteral(value,node1)
+    } else {
+      assertNodeIs("expAccess",Map[String,String](),node,"Node expected to be an expAccess (assertIsIntegerLiteral)")
+      assert(!hasValue(node,"name"))
+      val node2 = getBranch(node,"value")
+      assertNodeIs("integerLiteral",Map[String,String]("value"->value.toString),node2)
+    }
+  }
+
+  def canSimplify(node:Node) : Boolean = {
+    if (node.getKind=="expArrayAccess" && !hasBranch(node,"index")) {
+      return true;
+    }
+    if (node.getKind=="expAccess" && !hasBranch(node,"name")) {
+      return true;
+    }
+    return false
+  }
+
+  def simplify(node:Node) : Node = {
+    assert(canSimplify(node))
+    if (node.getKind=="expArrayAccess" && !hasBranch(node,"index")) {
+      val node1 = getBranch(node,"value")
+      if (canSimplify(node1)){
+        return simplify(node1)
+      } else {
+        return node1
+      }
+    }
+    if (node.getKind=="expAccess" && !hasBranch(node,"name")) {
+      val node1 = getBranch(node,"value")
+      if (canSimplify(node1)){
+        return simplify(node1)
+      } else {
+        return node1
+      }
+    }
+    throw new RuntimeException("Strange...");
+  }
+
+  def assertNodeIs(kind:String,values:Map[String,String],node:Node,extraMsg:String = ""){
+    if (kind!=node.getKind && canSimplify(node)){
+      return assertNodeIs(kind,values,simplify(node),extraMsg)
+    }
+    assert(kind==node.getKind,"Expected "+kind+", actual kind is "+node.getKind+". "+extraMsg)
     values.foreach { case (key,value)=> assert(value==getValue(node,key),"Value of "+key+" expected to be "+value+". Node: "+node.prettyPrint()) }
   }
 
@@ -147,7 +211,7 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
 
   def getBranch(node:Node, name:String) : Node = {
     val l = getBranches(node,name)
-    assert(1==l.size,"Node "+node.prettyPrint()+" expected to have one branch named "+name)
+    assert(1==l.size,"Node "+node.prettyPrint()+" expected to have one branch named "+name+". Kind: "+node.getKind)
     return l.head
   }
 

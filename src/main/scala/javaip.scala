@@ -24,6 +24,18 @@ object JavaIP {
     ).skip
 
     tokenCategory(
+      "double",
+      sequence(
+        choice(  // in terms of regexp: 0|([1-9][0-9]*)
+          chunk("0"),
+          sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))
+        ),
+        chunk("."),
+        oneOrMore(rangeOf('0', '9'))
+      )
+    )
+
+    tokenCategory(
       "integer",
       choice(  // in terms of regexp: 0|([1-9][0-9]*)
         chunk("0"),
@@ -122,6 +134,10 @@ object JavaIP {
 
     // Expressions start
 
+    val doubleLiteral = rule("doubleLiteral") {
+      capture("value",token("double"))
+    }
+
     val integerLiteral = rule("integerLiteral") {
       capture("value",token("integer"))
     }
@@ -147,7 +163,7 @@ object JavaIP {
         token("super"),
         optional(sequence(
           token("("),
-          zeroOrMore(exp,separator = token(",")),
+          zeroOrMore(capture("actualParams",exp),separator = token(",")),
           token(")")
         ))
       )
@@ -162,7 +178,9 @@ object JavaIP {
     }
 
     val instantiation = rule("instantiation") {
-      choice(classInstantiation,arrayInstantiation)
+      choice(
+        capture("classInst",classInstantiation),
+        capture("arrayInst",arrayInstantiation))
     }
 
     val classInstantiation = rule("classInstantiation"){
@@ -180,7 +198,7 @@ object JavaIP {
         token("new"),
         branch("className",qualifiedIdentifier),
         token("["),
-        exp,
+        capture("size",exp),
         token("]")
       )
     }
@@ -188,13 +206,14 @@ object JavaIP {
     val paren = rule("paren"){
       sequence(
         token("("),
-        exp,
+        capture("value",exp),
         token(")")
       )
     }
 
     val expAtom = subrule("expAtom") {
       choice(
+        doubleLiteral,
         integerLiteral,
         stringLiteral,
         charLiteral,
@@ -205,22 +224,18 @@ object JavaIP {
         superReference,
         nullReference,
         paren
-        //sequence(token("("),exp,token(")"))
       )
     }
 
     val expAccess = rule("expAccess") {
-      sequence(expAtom,optional(sequence(token("."),capture("name",token("identifier")))))
-    }
-
-    val expSuperMethodCall = rule("expSuperMethodCall") {
       sequence(
-        token("super"),
-        token("("),
-        zeroOrMore(exp,separator = token(",")),
-        token(")"))
+        branch("value",expAtom),
+        optional(sequence(
+          token("."),
+          capture("name",token("identifier"))
+        ))
+      )
     }
-
 
     val expMethodCall = rule("expMethodCall") {
       sequence(
@@ -228,7 +243,7 @@ object JavaIP {
           sequence(expAtom,token("."))),
         capture("name",token("identifier")),
         token("("),
-        zeroOrMore(exp,separator = token(",")),
+        zeroOrMore(capture("actualParams",exp),separator = token(",")),
         token(")"))
     }
 
@@ -237,12 +252,12 @@ object JavaIP {
         token("("),
         branch("targetType",qualifiedIdentifier),
         token(")"),
-        exp
+        capture("castedValue",exp)
       )
     }
 
     val expOpElement = subrule("expOpElement"){
-      choice(expSuperMethodCall,expMethodCall,castExp,expAccess)
+      choice(expMethodCall,castExp,expAccess)
     }
 
     val expOp : NamedRule = rule("expression") {
@@ -280,9 +295,9 @@ object JavaIP {
 
     val expArrayAccess = rule("expArrayAccess") {
       sequence(
-        expOp,
+        branch("value",expOp),
         optional(sequence(token("["),
-        exp,
+        branch("index",exp),
         token("]"))))
     }
 
@@ -615,4 +630,5 @@ object JavaIP {
     }
 
   }.syntax
+
 }

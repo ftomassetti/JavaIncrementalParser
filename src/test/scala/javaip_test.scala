@@ -85,7 +85,7 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   // Tests
 
- /* it should "parse a basic class" in {
+  it should "parse a basic class" in {
     var classes = parseAndGetClassesList("class A { }")
 
     assert(1==classes.size)
@@ -219,47 +219,47 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertQualId(List("D"),i2)
   }
 
-  it should "parse a field declaration with initializer" in {
+ it should "parse a field declaration with initializer" in {
     var m = parseAndGetField("int foo = 1;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(m,"initializationValue"))
+    assertIsIntegerLiteral(1,getBranch(m,"initializationValue"))
   }
 
   it should "parse sum expression" in {
     var m = parseAndGetField("int foo = 1+2;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("+",Map[String,String](),getBranch(m,"initializationValue"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"left"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranch(m,"initializationValue"),"right"))
+    assertNodeIs("+",Map[String,String](),toExpOp(getBranch(m,"initializationValue")))
+    assertIsIntegerLiteral(1,getBranch(toExpOp(getBranch(m,"initializationValue")),"left"))
+    assertIsIntegerLiteral(2,getBranch(toExpOp(getBranch(m,"initializationValue")),"right"))
   }
 
   it should "parse subtraction expression" in {
     val m = parseAndGetField("int foo = 1-2;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("-",Map[String,String](),getBranch(m,"initializationValue"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"left"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranch(m,"initializationValue"),"right"))
+    assertNodeIs("-",Map[String,String](),toExpOp(getBranch(m,"initializationValue")))
+    assertIsIntegerLiteral(1,getBranch(toExpOp(getBranch(m,"initializationValue")),"left"))
+    assertIsIntegerLiteral(2,getBranch(toExpOp(getBranch(m,"initializationValue")),"right"))
   }
 
   it should "parse multiplication expression" in {
     val m = parseAndGetField("int foo = 1*2;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("*",Map[String,String](),getBranch(m,"initializationValue"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"left"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranch(m,"initializationValue"),"right"))
+    assertNodeIs("*",Map[String,String](),toExpOp(getBranch(m,"initializationValue")))
+    assertIsIntegerLiteral(1,getBranch(toExpOp(getBranch(m,"initializationValue")),"left"))
+    assertIsIntegerLiteral(2,getBranch(toExpOp(getBranch(m,"initializationValue")),"right"))
   }
 
   it should "parse division expression" in {
     val m = parseAndGetField("int foo = 1/2;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("/",Map[String,String](),getBranch(m,"initializationValue"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"left"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(getBranch(m,"initializationValue"),"right"))
+    assertNodeIs("/",Map[String,String](),toExpOp(getBranch(m,"initializationValue")))
+    assertIsIntegerLiteral(1,getBranch(toExpOp(getBranch(m,"initializationValue")),"left"))
+    assertIsIntegerLiteral(2,getBranch(toExpOp(getBranch(m,"initializationValue")),"right"))
   }
 
   it should "parse variable reference expression" in {
@@ -272,6 +272,7 @@ class ParserSpec extends PapaCarloUnitSpec {
   it should "parse field access expression" in {
     val m = parseAndGetField("int foo = 1 . a;")
     assert("foo"==getValue(m,"name"))
+    println(m.prettyPrint())
     assertIsPrimitive("int",getBranch(m,"type"))
     assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"a"),getBranch(m,"initializationValue"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"container"))
@@ -287,7 +288,7 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertAbstractQualifier(m)
   }
 
-  it should "parse this ref" in {
+  /*it should "parse this ref" in {
     val m = parseAndGetMethod("void foo(){ this; }")
     assert(1==m.getBranches("stmts").size)
     val s = m.getBranches("stmts").head

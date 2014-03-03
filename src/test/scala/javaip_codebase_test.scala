@@ -165,9 +165,9 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("Animator_partial_4d")
   }
 
-  it should "parse Animator.java partial 4e" in {
+  /*it should "parse Animator.java partial 4e" in {
     parseWithoutErrors("Animator_partial_4e")
-  }
+  }*/
 
   it should "parse Animator.java partial 4f" in {
     parseWithoutErrors("Animator_partial_4f")
@@ -213,12 +213,12 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("AllComponents_partial_2g")
   }
 
-  /*it should "parse AllComponents.java partial 2" in {
+  it should "parse AllComponents.java partial 2" in {
     parseWithoutErrors("AllComponents_partial_2")
-  }*/
+  }
 
-  /*it should "parse AllComponents.java" in {
+  it should "parse AllComponents.java" in {
     parseWithoutErrors("AllComponents")
-  }*/
+  }
 
 }
