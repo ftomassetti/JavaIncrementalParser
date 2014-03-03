@@ -85,7 +85,7 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   // Tests
 
-  it should "parse a basic class" in {
+ /* it should "parse a basic class" in {
     var classes = parseAndGetClassesList("class A { }")
 
     assert(1==classes.size)
@@ -433,9 +433,9 @@ class ParserSpec extends PapaCarloUnitSpec {
     var e = parseExpr("this")
     println(e.prettyPrint())
     assertNodeIs("thisReference",Map[String,String](),e)
-  }
+  }*/
 
-  it should "parse method call on this without params" in {
+  /*it should "parse method call on this without params" in {
     var e = parseExpr("this.setBackground()")
     println(e.prettyPrint())
     assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
@@ -445,6 +445,6 @@ class ParserSpec extends PapaCarloUnitSpec {
     var e = parseExpr("this.setBackground(Color.white)")
     println(e.prettyPrint())
     assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
-  }
+  }*/
 
 }
