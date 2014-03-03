@@ -443,7 +443,6 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse method call on this with a param" in {
     var e = parseExpr("this.setBackground(Color.white)")
-    println(e.prettyPrint())
     assertNodeIs("expMethodCall",Map[String,String]("name"->"setBackground"),e)
   }
 
