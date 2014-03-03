@@ -110,7 +110,7 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
     val node1 = getBranch(node,"value")
     if (node1.getKind=="expAccess"){
       assertNodeIs("expAccess",Map[String,String](),node1,"Expected an expAccess inside an expArrayAccess (toExpOp method)")
-      assert(!hasValue(node1,"name"))
+      assert(!hasValue(node1,"fieldName"))
       val node2 = getBranch(node1,"value")
       assertNodeIs("expOp",Map[String,String](),node2)
       return node2
@@ -128,7 +128,7 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
       return assertIsIntegerLiteral(value,node1)
     } else {
       assertNodeIs("expAccess",Map[String,String](),node,"Node expected to be an expAccess (assertIsIntegerLiteral)")
-      assert(!hasValue(node,"name"))
+      assert(!hasValue(node,"fieldName"))
       val node2 = getBranch(node,"value")
       assertNodeIs("integerLiteral",Map[String,String]("value"->value.toString),node2)
     }
@@ -138,7 +138,7 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
     if (node.getKind=="expArrayAccess" && !hasBranch(node,"index")) {
       return true;
     }
-    if (node.getKind=="expAccess" && !hasBranch(node,"name")) {
+    if (node.getKind=="expAccess" && !hasValue(node,"fieldName")) {
       return true;
     }
     return false
@@ -154,7 +154,7 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
         return node1
       }
     }
-    if (node.getKind=="expAccess" && !hasBranch(node,"name")) {
+    if (node.getKind=="expAccess" && !hasValue(node,"fieldName")) {
       val node1 = getBranch(node,"value")
       if (canSimplify(node1)){
         return simplify(node1)
@@ -169,7 +169,7 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
     if (kind!=node.getKind && canSimplify(node)){
       return assertNodeIs(kind,values,simplify(node),extraMsg)
     }
-    assert(kind==node.getKind,"Expected "+kind+", actual kind is "+node.getKind+". "+extraMsg)
+    assert(kind==node.getKind,"Expected "+kind+", actual kind is "+node.getKind+". "+extraMsg+". Node: "+node.prettyPrint())
     values.foreach { case (key,value)=> assert(value==getValue(node,key),"Value of "+key+" expected to be "+value+". Node: "+node.prettyPrint()) }
   }
 

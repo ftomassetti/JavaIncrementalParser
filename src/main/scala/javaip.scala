@@ -163,7 +163,7 @@ object JavaIP {
         token("super"),
         optional(sequence(
           token("("),
-          zeroOrMore(capture("actualParams",exp),separator = token(",")),
+          zeroOrMore(branch("actualParams",exp),separator = token(",")),
           token(")")
         ))
       )
@@ -179,8 +179,8 @@ object JavaIP {
 
     val instantiation = rule("instantiation") {
       choice(
-        capture("classInst",classInstantiation),
-        capture("arrayInst",arrayInstantiation))
+        branch("classInst",classInstantiation),
+        branch("arrayInst",arrayInstantiation))
     }
 
     val classInstantiation = rule("classInstantiation"){
@@ -232,7 +232,7 @@ object JavaIP {
         branch("value",expAtom),
         optional(sequence(
           token("."),
-          capture("name",token("identifier"))
+          capture("fieldName",token("identifier"))
         ))
       )
     }
@@ -243,7 +243,7 @@ object JavaIP {
           sequence(expAtom,token("."))),
         capture("name",token("identifier")),
         token("("),
-        zeroOrMore(capture("actualParams",exp),separator = token(",")),
+        zeroOrMore(branch("actualParams",exp),separator = token(",")),
         token(")"))
     }
 

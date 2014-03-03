@@ -272,10 +272,9 @@ class ParserSpec extends PapaCarloUnitSpec {
   it should "parse field access expression" in {
     val m = parseAndGetField("int foo = 1 . a;")
     assert("foo"==getValue(m,"name"))
-    println(m.prettyPrint())
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("fieldAccess",Map[String,String]("fieldName"->"a"),getBranch(m,"initializationValue"))
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"container"))
+    assertNodeIs("expAccess",Map[String,String]("fieldName"->"a"),getBranch(m,"initializationValue"),"Initialization value expected to be expAccess")
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(simplify(getBranch(m,"initializationValue")),"value"))
   }
 
   it should "parse abstract class" in {
@@ -288,7 +287,7 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertAbstractQualifier(m)
   }
 
-  /*it should "parse this ref" in {
+  it should "parse this ref" in {
     val m = parseAndGetMethod("void foo(){ this; }")
     assert(1==m.getBranches("stmts").size)
     val s = m.getBranches("stmts").head
@@ -299,14 +298,14 @@ class ParserSpec extends PapaCarloUnitSpec {
   it should "parse function call without args" in {
     val m = parseAndGetField("int foo = baz();")
     val v = getBranch(m,"initializationValue")
-    assertNodeIs("functionCall",Map[String,String]("name"->"baz"),v)
-    assert(0==getBranches(v,"params").size)
+    assertNodeIs("expMethodCall",Map[String,String]("name"->"baz"),v)
+    assert(0==getBranches(v,"actualParams").size)
   }
 
   it should "parse function call with args" in {
     val m = parseAndGetField("int foo = baz(1,2);")
-    val v = getBranch(m,"initializationValue")
-    assertNodeIs("functionCall",Map[String,String]("name"->"baz"),v)
+    val v = simplify(getBranch(m,"initializationValue"))
+    assertNodeIs("expMethodCall",Map[String,String]("name"->"baz"),v)
     assert(2==getBranches(v,"actualParams").size)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranches(v,"actualParams").head)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranches(v,"actualParams").tail.head)
@@ -326,12 +325,14 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse instantiation of qualified class name with args" in {
     val m = parseAndGetField("int foo = new fooz.Baz(1,2);")
-    val v = getBranch(m,"initializationValue")
+    val v = simplify(getBranch(m,"initializationValue"))
     assertNodeIs("instantiation",Map[String,String](),v)
-    assertQualId(List[String]("fooz","Baz"),getBranch(v,"className"))
-    assert(2==v.getBranches("actualParams").size)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),v.getBranches("actualParams").head)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),v.getBranches("actualParams").tail.head)
+    val ci = getBranch(v,"classInst")
+    assertNodeIs("classInstantiation",Map[String,String](),ci)
+    assertQualId(List[String]("fooz","Baz"),getBranch(ci,"className"))
+    assert(2==ci.getBranches("actualParams").size)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),ci.getBranches("actualParams").head)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),ci.getBranches("actualParams").tail.head)
   }
 
   it should "parse assignment" in {
@@ -360,32 +361,32 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse comparison" in {
-    var e = parseExpr("1==2")
+    var e = simplify(parseExpr("1==2"))
     assertNodeIs("==",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = parseExpr("1!=2")
+    e = simplify(parseExpr("1!=2"))
     assertNodeIs("!=",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = parseExpr("1<2")
+    e = simplify(parseExpr("1<2"))
     assertNodeIs("<",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = parseExpr("1>2")
+    e = simplify(parseExpr("1>2"))
     assertNodeIs(">",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = parseExpr("1<=2")
+    e = simplify(parseExpr("1<=2"))
     assertNodeIs("<=",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = parseExpr("1>=2")
+    e = simplify(parseExpr("1>=2"))
     assertNodeIs(">=",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
@@ -432,20 +433,18 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse assignement of this" in {
     var e = parseExpr("this")
-    println(e.prettyPrint())
     assertNodeIs("thisReference",Map[String,String](),e)
-  }*/
+  }
 
-  /*it should "parse method call on this without params" in {
+  it should "parse method call on this without params" in {
     var e = parseExpr("this.setBackground()")
-    println(e.prettyPrint())
-    assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
+    assertNodeIs("expMethodCall",Map[String,String]("name"->"setBackground"),e)
   }
 
   it should "parse method call on this with a param" in {
     var e = parseExpr("this.setBackground(Color.white)")
     println(e.prettyPrint())
-    assertNodeIs("functionCall",Map[String,String]("name"->"setBackground"),e)
-  }*/
+    assertNodeIs("expMethodCall",Map[String,String]("name"->"setBackground"),e)
+  }
 
 }
