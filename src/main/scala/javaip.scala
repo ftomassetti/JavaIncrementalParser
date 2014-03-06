@@ -24,6 +24,18 @@ object JavaIP {
     ).skip
 
     tokenCategory(
+      "double",
+      sequence(
+        choice(  // in terms of regexp: 0|([1-9][0-9]*)
+          chunk("0"),
+          sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))
+        ),
+        chunk("."),
+        oneOrMore(rangeOf('0', '9'))
+      )
+    )
+
+    tokenCategory(
       "integer",
       choice(  // in terms of regexp: 0|([1-9][0-9]*)
         chunk("0"),
@@ -62,9 +74,9 @@ object JavaIP {
             rangeOf('a', 'z'),
             rangeOf('A','Z'),
             rangeOf('0', '9'))))
-    )
+    ).mutable
 
-    terminals("(", ")", "%", "+", "-", "*", "/", "{", "}",";",":",".",",",
+    terminals("(", ")", "%", "++","--","+", "-", "*", "/", "{", "}",";",":",".",",",
       "&&","||",
       "+=","-=","*=","/=",
       "==","!=","<=",">=","<",">",
@@ -82,6 +94,7 @@ object JavaIP {
       "private","protected","public",
       "static","native","final", "synchronized","abstract",
       "extends","implements","throws",
+      "try", "catch","finally",
       "this",
       "new"
     )
@@ -95,11 +108,11 @@ object JavaIP {
     import contextualizer._
 
     // fragment specification here
-    //trackContext("[", "]").allowCaching
-    trackContext("{", "}").allowCaching
     trackContext("/*", "*/").forceSkip.topContext
     trackContext("//", Token.LineBreakKind).forceSkip.topContext
-    //trackContext("&quot;", "&quot;").topContext
+    trackContext("[", "]").allowCaching
+    trackContext("{", "}").allowCaching
+    trackContext("\"", "\"").topContext
 
     contextualizer
   }
@@ -112,7 +125,18 @@ object JavaIP {
     import syntax._
     import Rule._
 
+    val qualifiedIdentifier = rule("qualifiedIdentifier") {
+      oneOrMore(
+        capture("part",token("identifier")),
+        separator = token(".")
+      )
+    }
+
     // Expressions start
+
+    val doubleLiteral = rule("doubleLiteral") {
+      capture("value",token("double"))
+    }
 
     val integerLiteral = rule("integerLiteral") {
       capture("value",token("integer"))
@@ -134,26 +158,122 @@ object JavaIP {
       token("this")
     }
 
+    val superReference = rule("superReference") {
+      sequence(
+        token("super"),
+        optional(sequence(
+          token("("),
+          zeroOrMore(branch("actualParams",exp),separator = token(",")),
+          token(")")
+        ))
+      )
+    }
+
+    val nullReference = rule("nullReference") {
+      token("null")
+    }
+
     val variableReference = rule("variableReference") {
       capture("name",token("identifier"))
     }
 
-    val expElement = subrule("expElement") {
+    val instantiation = rule("instantiation") {
       choice(
+        branch("classInst",classInstantiation),
+        branch("arrayInst",arrayInstantiation))
+    }
+
+    val classInstantiation = rule("classInstantiation"){
+      sequence(
+        token("new"),
+        branch("className",qualifiedIdentifier),
+        token("("),
+        zeroOrMore(branch("actualParams",exp),separator = token(",")),
+        token(")")
+      )
+    }
+
+    val arrayInstantiation = rule("arrayInstantiation"){
+      sequence(
+        token("new"),
+        branch("className",qualifiedIdentifier),
+        token("["),
+        capture("size",exp),
+        token("]")
+      )
+    }
+
+    val paren = rule("paren"){
+      sequence(
+        token("("),
+        capture("value",exp),
+        token(")")
+      )
+    }
+
+    val expAtom = subrule("expAtom") {
+      choice(
+        doubleLiteral,
         integerLiteral,
         stringLiteral,
         charLiteral,
         booleanLiteral,
+        instantiation,
         variableReference,
-        thisReference
+        thisReference,
+        superReference,
+        nullReference,
+        paren
       )
     }
 
-    val expComp : NamedRule = rule("expression") {
-      val rule =
-        expression(branch("operand", expElement))
+    val expAccess = rule("expAccess").transform { orig =>
+      if (orig.getValues contains  "fieldName"){
+        orig
+      } else {
+        orig.getBranches("value").head
+      }
+    } {
+      sequence(
+        branch("value",expAtom),
+        optional(sequence(
+          token("."),
+          capture("fieldName",token("identifier"))
+        ))
+      )
+    }
 
-      group(rule, "(", ")")
+    val expMethodCall = rule("expMethodCall") {
+      sequence(
+        optional(
+          sequence(expAtom,token("."))),
+        capture("name",token("identifier")),
+        token("("),
+        zeroOrMore(branch("actualParams",exp),separator = token(",")),
+        token(")"))
+    }
+
+    val castExp = rule("castExp"){
+      sequence(
+        token("("),
+        branch("targetType",qualifiedIdentifier),
+        token(")"),
+        capture("castedValue",exp)
+      )
+    }
+
+    val expOpElement = subrule("expOpElement"){
+      choice(expMethodCall,castExp,expAccess)
+    }
+
+    val expOp : NamedRule = rule("expression") {
+      val rule =
+        expression(branch("operand", expOpElement))
+
+      postfix(rule,"++",1)
+      postfix(rule,"--",1)
+      prefix(rule,"++",1)
+      prefix(rule,"--",1)
       postfix(rule, "%", 1)
       prefix(rule, "+", 2)
       prefix(rule, "-", 2)
@@ -165,45 +285,37 @@ object JavaIP {
       infix(rule, "!=", 5)
       infix(rule, ">=", 5)
       infix(rule, "<=", 5)
+      infix(rule, "+=", 5)
+      infix(rule, "-=", 5)
+      infix(rule, "/=", 5)
+      infix(rule, "*=", 5)
       infix(rule, "<", 5)
       infix(rule, ">", 5)
+      infix(rule,"&&",7)
+      infix(rule,"||",7)
+      infix(rule,"&",7)
+      infix(rule,"|",7)
 
       rule
     }
 
-    val fieldAccess = rule("fieldAccess") {
+    val expArrayAccess = rule("expArrayAccess").transform { orig =>
+      if (orig.getBranches contains  "index"){
+       orig
+      } else {
+        orig.getBranches("value").head
+      }
+    } {
       sequence(
-        branch("container",expComp),
-        token("."),
-        capture("fieldName",token("identifier"))
-      )
-    }
-
-    val methodCall = rule("functionCall"){
-      sequence(
-        optional(sequence(
-          branch("target",expComp),
-          token(".")
-        )),
-        capture("name",token("identifier")),
-        token("("),
-        zeroOrMore(branch("actualParams",exp),separator = token(",")),
-        token(")"))
-    }
-
-    val instantiation = rule("instantiation"){
-      sequence(
-        token("new"),
-        branch("className",qualifiedIdentifier),
-        token("("),
-        zeroOrMore(branch("actualParams",exp),separator = token(",")),
-        token(")")
-      )
+        branch("value",expOp),
+        optional(sequence(token("["),
+        branch("index",exp),
+        token("]"))))
     }
 
     val arrayAccess = rule("arrayAccess"){
       sequence(
-        branch("array",expComp),
+        branch("array",expOp),
         token("["),
         branch("index",exp),
         token("]")
@@ -211,7 +323,7 @@ object JavaIP {
     }
 
     val exp : Rule = subrule("expUsage") {
-      choice(instantiation, arrayAccess, methodCall, fieldAccess, expComp)
+      expArrayAccess
     }
 
     // Expressions end
@@ -272,7 +384,7 @@ object JavaIP {
       sequence(
         branch("qualifiers",zeroOrMore(qualifier)),
         branch("type",typeUsage),
-        capture("name", token("identifier")),
+        oneOrMore(capture("name", token("identifier")),separator=token(",")),
         optional(
           sequence(
             token("="),
@@ -287,6 +399,28 @@ object JavaIP {
       sequence(
         branch("type",typeUsage),
         capture("name",token("identifier"))
+      )
+    }
+
+    val constructorDecl = rule("constructorDecl") {
+      sequence(
+        branch("qualifiers",zeroOrMore(qualifier)),
+        capture("name", token("identifier")),
+        token("("),
+        zeroOrMore(
+          branch("params", paramDecl),
+          separator = token(",")
+        ),
+        recover(token(")"),"Missing closing parenthesis"),
+        choice(
+          token(";"),
+          sequence(
+            token("{"),
+            zeroOrMore(branch("stmts",statement)),
+            token("}"),
+            optional(token(";"))
+          )
+        )
       )
     }
 
@@ -305,7 +439,7 @@ object JavaIP {
           branch("params", paramDecl),
           separator = token(",")
         ),
-        token(")"),
+        recover(token(")"),"Missing closing parenthesis"),
         choice(
           token(";"),
           sequence(
@@ -320,15 +454,9 @@ object JavaIP {
 
     val memberDecl = rule("memberDecl") {
       choice(
+        branch("constructor",constructorDecl),
         branch("method",methodDecl),
         branch("field",fieldDecl)
-      )
-    }
-
-    val qualifiedIdentifier = rule("qualifiedIdentifier") {
-      oneOrMore(
-        capture("part",token("identifier")),
-        separator = token(".")
       )
     }
 
@@ -387,16 +515,21 @@ object JavaIP {
     val assignment = rule("assignment"){
       sequence(
         branch("assigned",qualifiedIdentifier),
+        optional(sequence(
+          token("["),
+          exp,
+          token("]")
+        )),
         token("="),
         branch("value",exp),
-        token(";")
+        recover(token(";"),"semicolon missing")
       )
     }
 
     val expressionStatement = rule("expressionStatement"){
       sequence(
         branch("expression",exp),
-        token(";")
+        recover(token(";"),"semicolon missing")
       )
     }
 
@@ -408,21 +541,21 @@ object JavaIP {
       sequence(
         token("return"),
         branch("value",exp),
-        token(";")
+        recover(token(";"),"semicolon missing")
       )
     }
 
     val localVarDecl = rule("localVarDecl") {
       sequence(
         branch("type",typeUsage),
-        capture("name", token("identifier")),
+        oneOrMore(capture("name", token("identifier")),separator = token(",")),
         optional(
           sequence(
             token("="),
             branch("initializationValue",exp)
           )
         ),
-        token(";").permissive
+        recover(token(";"),"semicolon missing")
       )
     }
 
@@ -430,7 +563,7 @@ object JavaIP {
       sequence(
         token("{"),
         zeroOrMore(branch("stmts",statement)),
-        token("}"),
+        recover(token("}"),"Missing }"),
         optional(token(";"))
       )
     }
@@ -440,7 +573,7 @@ object JavaIP {
         token("if"),
         token("("),
         branch("condition",exp),
-        token(")"),
+        recover(token(")"),"closing parenthesis expected"),
         branch("then",statement),
         optional(sequence(
           token("else"),
@@ -449,16 +582,74 @@ object JavaIP {
       )
     }
 
+    val forStmt = rule("forStmt") {
+      sequence(
+        token("for"),
+        token("("),
+        choice(
+          localVarDecl, // it parses already the semicolon
+          token(";")),
+        optional(exp),
+        recover(token(";"),"semicolon missing"),
+        optional(exp),
+        recover(token(")"),"closing parenthesis expected"),
+        token("{"),
+        zeroOrMore(statement),
+        recover(token("}"),"Missing }")
+      )
+    }
+
+    val whileStmt = rule("whileStmt") {
+      sequence(
+        token("while"),
+        token("("),
+        optional(exp),
+        recover(token(")"),"closing parenthesis expected"),
+        token("{"),
+        zeroOrMore(statement),
+        recover(token("}"),"Missing }"),
+        optional(token(";"))
+      )
+    }
+
+    val tryStmt = rule("tryStmt") {
+      sequence(
+        token("try"),
+        token("{"),
+        zeroOrMore(statement),
+        recover(token("}"),"closing bracket expected"),
+        token("catch"),
+        token("("),
+        qualifiedIdentifier,
+        token("identifier"),
+        recover(token(")"),"closing parenthesis expected"),
+        token("{"),
+        zeroOrMore(statement),
+        recover(token("}"),"Missing }"),
+        optional(sequence(
+          token("finally"),
+          token("{"),
+          zeroOrMore(statement),
+          token("}")
+        ))
+      )
+    }
+
     val statement : NamedRule = subrule("statement") {
       choice(
         expressionStatement,
-        emptyStatement,
         assignment,
         returnStmt,
         localVarDecl,
         blockStmt,
-        ifStmt)
+        ifStmt,
+        tryStmt,
+        whileStmt,
+        forStmt,
+        emptyStatement
+     )
     }
 
   }.syntax
+
 }

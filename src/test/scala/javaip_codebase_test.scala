@@ -5,6 +5,17 @@ import name.lakhin.eliah.projects.papacarlo.test.utils.ErrorMonitor
 
 class javaip_codebase_test extends PapaCarloUnitSpec {
 
+  def parseWithoutErrors(name:String) {
+    val filename = "src/test/scala/codebase/"+name+".java.code"
+    val code = scala.io.Source.fromFile(filename).mkString
+
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    val m = new ErrorMonitor(lexer,syntax)
+    lexer.input(code)
+    assert(0==syntax.getErrors.size,m.getResult)
+  }
+
  it should "parse typical compilation unit " in {
     val code = """
                  // This example is from the book _Java in a Nutshell_ by David Flanagan.
@@ -95,7 +106,6 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     assert(0==syntax.getErrors.size,m.getResult)
   }
 
-
   it should "parse Scribble.java partial 4" in {
     val filename = "src/test/scala/codebase/Scribble_partial_4.java.code"
     val code = scala.io.Source.fromFile(filename).mkString
@@ -126,7 +136,111 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     val syntax = JavaIP.syntax(lexer)
     val m = new ErrorMonitor(lexer,syntax)
     lexer.input(code)
-    assert(0==syntax.getErrors.size)
+    assert(0==syntax.getErrors.size,m.getResult)
+  }
+
+  it should "parse Animator.java partial 1a" in {
+    parseWithoutErrors("Animator_partial_1a")
+  }
+
+  it should "parse Animator.java partial 1b" in {
+    parseWithoutErrors("Animator_partial_1b")
+  }
+
+  it should "parse Animator.java partial 1c" in {
+    parseWithoutErrors("Animator_partial_1c")
+  }
+
+  it should "parse Animator.java partial 1d" in {
+    parseWithoutErrors("Animator_partial_1d")
+  }
+
+  it should "parse Animator.java partial 1e" in {
+    parseWithoutErrors("Animator_partial_1e")
+  }
+
+  it should "parse Animator.java partial 1" in {
+    parseWithoutErrors("Animator_partial_1")
+  }
+
+  it should "parse Animator.java partial 2" in {
+    parseWithoutErrors("Animator_partial_2")
+  }
+
+  it should "parse Animator.java partial 3" in {
+    parseWithoutErrors("Animator_partial_3")
+  }
+
+  it should "parse Animator.java partial 4a" in {
+    parseWithoutErrors("Animator_partial_4a")
+  }
+
+  it should "parse Animator.java partial 4b" in {
+    parseWithoutErrors("Animator_partial_4b")
+  }
+
+  it should "parse Animator.java partial 4c" in {
+    parseWithoutErrors("Animator_partial_4c")
+  }
+
+  it should "parse Animator.java partial 4d" in {
+    parseWithoutErrors("Animator_partial_4d")
+  }
+
+  /*it should "parse Animator.java partial 4e" in {
+    parseWithoutErrors("Animator_partial_4e")
+  }*/
+
+  it should "parse Animator.java partial 4f" in {
+    parseWithoutErrors("Animator_partial_4f")
+  }
+
+  it should "parse Animator.java partial 4g" in {
+    parseWithoutErrors("Animator_partial_4g")
+  }
+
+  /*it should "parse Animator.java" in {
+    parseWithoutErrors("Animator")
+  }*/
+
+  it should "parse AllComponents.java partial 1" in {
+    parseWithoutErrors("AllComponents_partial_1")
+  }
+
+  it should "parse AllComponents.java partial 2a" in {
+    parseWithoutErrors("AllComponents_partial_2a")
+  }
+
+  it should "parse AllComponents.java partial 2b" in {
+    parseWithoutErrors("AllComponents_partial_2b")
+  }
+
+  it should "parse AllComponents.java partial 2c" in {
+    parseWithoutErrors("AllComponents_partial_2c")
+  }
+
+  it should "parse AllComponents.java partial 2d" in {
+    parseWithoutErrors("AllComponents_partial_2d")
+  }
+
+  it should "parse AllComponents.java partial 2e" in {
+    parseWithoutErrors("AllComponents_partial_2e")
+  }
+
+  it should "parse AllComponents.java partial 2f" in {
+    parseWithoutErrors("AllComponents_partial_2f")
+  }
+
+  it should "parse AllComponents.java partial 2g" in {
+    parseWithoutErrors("AllComponents_partial_2g")
+  }
+
+  it should "parse AllComponents.java partial 2" in {
+    parseWithoutErrors("AllComponents_partial_2")
+  }
+
+  it should "parse AllComponents.java" in {
+    parseWithoutErrors("AllComponents")
   }
 
 }

@@ -1,0 +1,31 @@
+// This example is from the book _Java in a Nutshell_ by David Flanagan.
+// Written by David Flanagan.  Copyright (c) 1996 O'Reilly & Associates.
+// You may study, use, modify, and distribute this example for any purpose.
+// This example is provided WITHOUT WARRANTY either expressed or implied.
+
+import java.awt.*;
+
+public class AllComponents extends Frame {
+    MenuBar menubar;                // the menubar
+    Menu file, help;                // menu panes
+    Button okay, cancel;            // buttons
+    List list;                      // A list of choices
+    Choice choice;                  // A menu of choices
+    CheckboxGroup checkbox_group;   // A group of button choices
+    Checkbox[] checkboxes;          // the buttons to choose from
+    TextField textfield;            // One line of text input
+    TextArea  textarea;             // A text window
+    ScrollableScribble scribble;    // An area to draw in.
+    FileDialog file_dialog;
+
+    Panel panel1, panel2 ;    // Sub-containers for all this stuff.
+    Panel buttonpanel;
+
+    // The layout manager for each of the containers.
+    GridBagLayout gridbag = new GridBagLayout();
+
+    public AllComponents(String title) {
+        super(title);
+    }
+
+}
