@@ -441,7 +441,7 @@ object JavaIP {
         ),
         recover(token(")"),"Missing closing parenthesis"),
         choice(
-          token(";"),
+          capture("abstractBody",token(";")),
           sequence(
             token("{"),
             zeroOrMore(branch("stmts",statement)),

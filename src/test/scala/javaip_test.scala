@@ -167,6 +167,15 @@ class ParserSpec extends PapaCarloUnitSpec {
     val m = parseAndGetMethod("void foo(){}")
     assert("foo"==getValue(m,"name"))
     assert("voidType"==getBranch(m,"returnType").getKind)
+    assert(false==hasValue(m,"abstractBody"))
+  }
+
+  it should "parse an abstract method declaration" in {
+    val m = parseAndGetMethod("abstract void foo();")
+    assert("foo"==getValue(m,"name"))
+    assert("voidType"==getBranch(m,"returnType").getKind)
+    assertAbstractQualifier(m);
+    assert(true==hasValue(m,"abstractBody"))
   }
 
   it should "parse a method declaration with annotation" in {
