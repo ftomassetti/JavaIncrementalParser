@@ -77,7 +77,28 @@ class TokenizerSpec extends PapaCarloUnitSpec {
     check_token(";",";",tokens(19))
     check_token("}","}",tokens(20))
     check_token("}","}",tokens(21))
-  }  
+  }
+
+  // TODO next two tests are related to https://groups.google.com/forum/#!topic/papa-carlo/cTcQY3RbtYA
+
+  /*it should "parse annidated line comments inside method" in {
+    val code = "class Animator {\n\n    void run() {\n            //this.getToolkit().sync();  // Force it to be drawn *now*.\n    }\n}"
+    val lexer = JavaIP.tokenizer
+    val tokens = lexer.tokenize(code).filterNot(node => node.kind=="whitespace" || node.kind=="comment")
+    //println("Number of tokens: "+tokens.length)
+    //tokens.foreach(t => println("* "+t.kind+", '"+t.value+"'"))
+    assert(10==tokens.length)
+  }
+
+  it should "parse line comments inside method" in {
+    val code = "class Animator {\n\n    void run() {\n            //this.getToolkit().sync();\n    }\n}"
+    val lexer = JavaIP.tokenizer
+    val tokens = lexer.tokenize(code).filterNot(node => node.kind=="whitespace" || node.kind=="comment")
+    //println("Number of tokens: "+tokens.length)
+    //tokens.foreach(t => println("* "+t.kind+", '"+t.value+"'"))
+    assert(10==tokens.length)
+  }*/
+
 
 }
 
@@ -146,6 +167,14 @@ class ParserSpec extends PapaCarloUnitSpec {
     val m = parseAndGetMethod("void foo(){}")
     assert("foo"==getValue(m,"name"))
     assert("voidType"==getBranch(m,"returnType").getKind)
+  }
+
+  it should "parse a method declaration with annotation" in {
+    val m = parseAndGetMethod("@myAnnotation void foo(){}")
+    assert("foo"==getValue(m,"name"))
+    assert("voidType"==getBranch(m,"returnType").getKind)
+    assert(1==m.getBranches.get("annotations").get.size)
+    assertNodeIs("annotationUsage",Map[String,String](),getBranch(m,"annotations"))
   }
 
   it should "parse a method declaration with primitive return type" in {
@@ -444,6 +473,17 @@ class ParserSpec extends PapaCarloUnitSpec {
   it should "parse method call on this with a param" in {
     var e = parseExpr("this.setBackground(Color.white)")
     assertNodeIs("expMethodCall",Map[String,String]("name"->"setBackground"),e)
+  }
+
+  it should "parse only line comments with open bracket" in {
+    var code = "// abc {\n// def[ \n//ghj"
+    var root = parseAndGetRoot(code)
+    assertNodeIs("compilationUnit",Map[String,String](),root)
+  }
+
+  it should "double line comment" in {
+    var code = "//this.getToolkit().sync();  // Force it to be drawn *now*."
+    var root = parseAndGetRoot(code)
   }
 
 }

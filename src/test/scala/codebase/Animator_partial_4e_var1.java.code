@@ -1,0 +1,27 @@
+// This example is from the book _Java in a Nutshell_ by David Flanagan.
+// Written by David Flanagan.  Copyright (c) 1996 O'Reilly & Associates.
+// You may study, use, modify, and distribute this example for any purpose.
+// This example is provided WITHOUT WARRANTY either expressed or implied.
+
+/**
+ * This applet displays an animation.  It doesn't handle errors while
+ * loading images.  It doesn't wait for all images to be loaded before
+ * starting the animation.  These problems will be addressed later.
+ **/
+import java.applet.*;
+import java.awt.*;
+import java.net.*;
+import java.util.*;
+
+public class Animator extends Applet implements Runnable {
+
+    // This is the body of the thread--the method that does the animation.
+    public void run() {
+        while(true) {
+            //if (++current_image >= images.length) current_image = 0;
+            //this.getGraphics().drawImage(images[current_image], 0, 0, this);
+            //this.getToolkit().sync();  // Force it to be drawn *now*.
+            //try { Thread.sleep(200); } catch (InterruptedException e) { ; }
+        }
+    }
+}

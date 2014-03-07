@@ -65,6 +65,18 @@ object JavaIP {
     ).mutable
 
     tokenCategory(
+      "annotationName",sequence(
+        chunk("@"),
+        choice(chunk("_"),rangeOf('a', 'z'),rangeOf('A','Z')),
+        zeroOrMore(
+          choice(
+            chunk("_"),
+            rangeOf('a', 'z'),
+            rangeOf('A','Z'),
+            rangeOf('0', '9'))))
+    ).mutable
+
+    tokenCategory(
       "identifier",
       sequence(
         choice(chunk("_"),rangeOf('a', 'z'),rangeOf('A','Z')),
@@ -361,6 +373,7 @@ object JavaIP {
 
     val fieldDecl = rule("fieldDecl") {
       sequence(
+        branch("annotations",zeroOrMore(annotationUsage)),
         branch("qualifiers",zeroOrMore(qualifier)),
         branch("type",typeUsage),
         oneOrMore(capture("name", token("identifier")),separator=token(",")),
@@ -383,6 +396,7 @@ object JavaIP {
 
     val constructorDecl = rule("constructorDecl") {
       sequence(
+        branch("annotations",zeroOrMore(annotationUsage)),
         branch("qualifiers",zeroOrMore(qualifier)),
         capture("name", token("identifier")),
         token("("),
@@ -403,8 +417,15 @@ object JavaIP {
       )
     }
 
+    val annotationUsage = rule("annotationUsage"){
+      sequence(
+        capture("name",token("annotationName"))
+      )
+    }
+
     val methodDecl = rule("methodDecl") {
       sequence(
+        branch("annotations",zeroOrMore(annotationUsage)),
         branch("qualifiers",zeroOrMore(qualifier)),
         branch("returnType",
           choice(
@@ -443,6 +464,7 @@ object JavaIP {
       // Consists of three sequential parts: "[" token, series of nested
       // elements separated with "," token, and losing "]" token.
       sequence(
+        branch("annotations",zeroOrMore(annotationUsage)),
         branch("qualifiers",zeroOrMore(qualifier)),
         token("class"),
         capture("name", token("identifier")),
@@ -461,6 +483,7 @@ object JavaIP {
         ),
         token("{"),
         branch("members",zeroOrMore(memberDecl)),
+        //token("}")
         recover(token("}"), "class must end with '}'")
       )
     }

@@ -1,0 +1,6 @@
+class Animator {
+
+    void run() {
+            //this.getToolkit().sync();  // Force it to be drawn *now*.
+    }
+}

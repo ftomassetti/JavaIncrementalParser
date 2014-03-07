@@ -1,0 +1,5 @@
+class Animator {
+
+            //this.getToolkit().sync();  // Force it to be drawn *now*.
+
+}
