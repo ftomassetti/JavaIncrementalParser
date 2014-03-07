@@ -205,6 +205,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertIsPrimitive("int",getBranch(m,"type"))
   }
 
+  it should "parse generic type usage" in {
+    val f = parseAndGetField("List<String> adaptedTokens;")
+    assert("foo"==getValue(f,"adaptedTokens"))
+    println(f.prettyPrint())
+  }
+
   it should "parse a field declaration with array type" in {
     val m = parseAndGetField("int[] foo;")
     assert("foo"==getValue(m,"name"))
