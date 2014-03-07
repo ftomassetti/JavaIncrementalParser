@@ -389,6 +389,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(s,"initializationValue"))
   }
 
+  it should "parse throw statement" in {
+    val s = parseStmt("throw 1")
+    assertNodeIs("throwStmt",Map[String,String](),s);
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(s,"value"))
+  }
+
   it should "parse comparison" in {
     var e = simplify(parseExpr("1==2"))
     assertNodeIs("==",Map[String,String](),e)

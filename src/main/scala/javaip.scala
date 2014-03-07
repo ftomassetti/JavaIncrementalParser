@@ -637,6 +637,13 @@ object JavaIP {
       )
     }
 
+    val throwStmt = rule("throwStmt") {
+      sequence(
+        token("throw"),
+        branch("value",exp)
+      )
+    }
+
     val statement : NamedRule = subrule("statement") {
       choice(
         expressionStatement,
@@ -648,7 +655,8 @@ object JavaIP {
         tryStmt,
         whileStmt,
         forStmt,
-        emptyStatement
+        emptyStatement,
+        throwStmt
      )
     }
 
