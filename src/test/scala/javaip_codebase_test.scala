@@ -187,9 +187,37 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("Animator_partial_4d")
   }
 
-  /*it should "parse Animator.java partial 4e" in {
+  it should "parse Animator.java partial 4e" in {
     parseWithoutErrors("Animator_partial_4e")
-  }*/
+  }
+
+  it should "parse Animator.java partial 4e var 1" in {
+    parseWithoutErrors("Animator_partial_4e_var1")
+  }
+
+  it should "parse Animator.java partial 4e var 2" in {
+    parseWithoutErrors("Animator_partial_4e_var2")
+  }
+
+  it should "parse Animator.java partial 4e var 4" in {
+    parseWithoutErrors("Animator_partial_4e_var4")
+  }
+
+  it should "parse Animator.java partial 4e var 4b" in {
+    parseWithoutErrors("Animator_partial_4e_var4b")
+  }
+
+  it should "parse Animator.java partial 4e var 4c" in {
+    parseWithoutErrors("Animator_partial_4e_var4c")
+  }
+
+  it should "parse Animator.java partial 4e var 4d" in {
+    parseWithoutErrors("Animator_partial_4e_var4d")
+  }
+
+  it should "parse Animator.java partial 4e var 5" in {
+    parseWithoutErrors("Animator_partial_4e_var5")
+  }
 
   it should "parse Animator.java partial 4f" in {
     parseWithoutErrors("Animator_partial_4f")
@@ -242,5 +270,9 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
   it should "parse AllComponents.java" in {
     parseWithoutErrors("AllComponents")
   }
+
+  /*it should "parse AbstactWekaProgrammingLanguageTokenizer.java" in {
+    parseWithoutErrors("AbstactWekaProgrammingLanguageTokenizer")
+  }*/
 
 }

@@ -19,6 +19,12 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
     assert(0==syntax.getErrors.size,"There are syntax errors: "+m.getResult+". Code parsed '"+code+"'")
   }
 
+  def parseAndGetRoot(code : String) : Node = {
+    var root : Option[Node] = None
+    parse(code, node => root = Option(node))
+    return root.get
+  }
+
   def parseAndGetClassesList(code : String) : List[Node] = {
     var classes = List[Node]()
     parse(code,node => {
