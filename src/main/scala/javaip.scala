@@ -336,8 +336,15 @@ object JavaIP {
       )
     }
 
-    val classType = rule("classType") {
-      capture("name",token("identifier"))
+    val classType : NamedRule = rule("classType") {
+      sequence(
+         capture("name",token("identifier")),
+         optional(sequence(
+          token("<"),
+          zeroOrMore(typeUsage,separator=token(",")),
+          token(">")
+         ))
+      )
     }
 
     val primitiveType = rule("primitiveType") {
