@@ -222,7 +222,9 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
   }
 
   def getValue(node:Node, name:String) : String = {
-    return node.getValues.get(name).get.head
+    val l = getValues(node,name)
+    assert(1==l.size,"Node "+node.prettyPrint()+" expected to have one value named "+name+". Kind: "+node.getKind)
+    return l.head
   }
 
   def assertAbstractQualifier(node: Node) {
