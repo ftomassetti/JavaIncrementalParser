@@ -163,7 +163,7 @@ object JavaIP {
     }
 
     val booleanLiteral = rule("booleanLiteral") {
-      choice(token("false"),token("true"))
+      capture("value",choice(token("true"),token("false")))
     }
 
     val thisReference = rule("thisReference") {
@@ -239,7 +239,13 @@ object JavaIP {
       )
     }
 
-    val expAccess = rule("expAccess") {
+    val expAccess = rule("expAccess").transform { orig =>
+      if (orig.getValues contains  "fieldName"){
+        orig
+      } else {
+        orig.getBranches("value").head
+      }
+    } {
       sequence(
         branch("value",expAtom),
         optional(sequence(
@@ -305,12 +311,27 @@ object JavaIP {
       rule
     }
 
-    val expArrayAccess = rule("expArrayAccess") {
+    val expArrayAccess = rule("expArrayAccess").transform { orig =>
+      if (orig.getBranches contains  "index"){
+       orig
+      } else {
+        orig.getBranches("value").head
+      }
+    } {
       sequence(
         branch("value",expOp),
         optional(sequence(token("["),
         branch("index",exp),
         token("]"))))
+    }
+
+    val arrayAccess = rule("arrayAccess"){
+      sequence(
+        branch("array",expOp),
+        token("["),
+        branch("index",exp),
+        token("]")
+      )
     }
 
     val exp : Rule = subrule("expUsage") {

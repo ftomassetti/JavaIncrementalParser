@@ -106,6 +106,28 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     assert(0==syntax.getErrors.size,m.getResult)
   }
 
+  it should "parse Scribble.java partial 4" in {
+    val filename = "src/test/scala/codebase/Scribble_partial_4.java.code"
+    val code = scala.io.Source.fromFile(filename).mkString
+
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    val m = new ErrorMonitor(lexer,syntax)
+    lexer.input(code)
+    assert(0==syntax.getErrors.size,m.getResult)
+  }
+
+  it should "parse Scribble.java partial 5" in {
+    val filename = "src/test/scala/codebase/Scribble_partial_5.java.code"
+    val code = scala.io.Source.fromFile(filename).mkString
+
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    val m = new ErrorMonitor(lexer,syntax)
+    lexer.input(code)
+    assert(0==syntax.getErrors.size,m.getResult)
+  }
+
   it should "parse Scribble.java" in {
     val filename = "src/test/scala/codebase/Scribble.java.code"
     val code = scala.io.Source.fromFile(filename).mkString
@@ -165,25 +187,25 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("Animator_partial_4d")
   }
 
-  /*it should "parse Animator.java partial 4e" in {
+  it should "parse Animator.java partial 4e" in {
     parseWithoutErrors("Animator_partial_4e")
-  }*/
+  }
 
-  /*it should "parse Animator.java partial 4e var 1" in {
+  it should "parse Animator.java partial 4e var 1" in {
     parseWithoutErrors("Animator_partial_4e_var1")
-  }*/
+  }
 
-  /*it should "parse Animator.java partial 4e var 2" in {
+  it should "parse Animator.java partial 4e var 2" in {
     parseWithoutErrors("Animator_partial_4e_var2")
-  }*/
+  }
 
-  /*it should "parse Animator.java partial 4e var 4" in {
+  it should "parse Animator.java partial 4e var 4" in {
     parseWithoutErrors("Animator_partial_4e_var4")
-  }*/
+  }
 
-  /*it should "parse Animator.java partial 4e var 4b" in {
+  it should "parse Animator.java partial 4e var 4b" in {
     parseWithoutErrors("Animator_partial_4e_var4b")
-  }*/
+  }
 
   it should "parse Animator.java partial 4e var 4c" in {
     parseWithoutErrors("Animator_partial_4e_var4c")
@@ -193,9 +215,9 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("Animator_partial_4e_var4d")
   }
 
-  /*it should "parse Animator.java partial 4e var 5" in {
+  it should "parse Animator.java partial 4e var 5" in {
     parseWithoutErrors("Animator_partial_4e_var5")
-  }*/
+  }
 
   it should "parse Animator.java partial 4f" in {
     parseWithoutErrors("Animator_partial_4f")

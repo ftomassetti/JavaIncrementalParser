@@ -127,17 +127,17 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
   }
 
   def assertIsIntegerLiteral(value:Int, node: Node){
-    if (node.getKind=="expArrayAccess"){
+    /*if (node.getKind=="expArrayAccess"){
       assertNodeIs("expArrayAccess",Map[String,String](),node)
       assert(!hasBranch(node,"index"))
       val node1 = getBranch(node,"value")
       return assertIsIntegerLiteral(value,node1)
-    } else {
-      assertNodeIs("expAccess",Map[String,String](),node,"Node expected to be an expAccess (assertIsIntegerLiteral)")
+    } else {*/
+      /*assertNodeIs("expAccess",Map[String,String](),node,"Node expected to be an expAccess (assertIsIntegerLiteral)")
       assert(!hasValue(node,"fieldName"))
-      val node2 = getBranch(node,"value")
-      assertNodeIs("integerLiteral",Map[String,String]("value"->value.toString),node2)
-    }
+      val node2 = getBranch(node,"value")*/
+      assertNodeIs("integerLiteral",Map[String,String]("value"->value.toString),node)
+    //}
   }
 
   def canSimplify(node:Node) : Boolean = {

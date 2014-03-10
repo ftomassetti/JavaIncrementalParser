@@ -1,7 +1,7 @@
 package codemodels.incrementalparsers.javaip
 
 import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
-  Contextualizer, Token}
+Contextualizer, Token}
 import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
 import name.lakhin.eliah.projects.papacarlo.syntax.Rule
 import name.lakhin.eliah.projects.papacarlo.syntax.Node
@@ -20,7 +20,7 @@ class TokenizerSpec extends PapaCarloUnitSpec {
   it should "parse a basic class" in {
     val code = "class A { }"
     val lexer = JavaIP.tokenizer
-    val tokens = lexer.tokenize(code)    
+    val tokens = lexer.tokenize(code)
     assert(7==tokens.length)
     check_token("class","class",tokens(0))
     check_token("whitespace"," ",tokens(1))
@@ -34,7 +34,7 @@ class TokenizerSpec extends PapaCarloUnitSpec {
   it should "parse a field definition" in {
     val code = "class A {int[] bits;}"
     val lexer = JavaIP.tokenizer
-    val tokens = lexer.tokenize(code)  
+    val tokens = lexer.tokenize(code)
     assert(12==tokens.length)
     check_token("class","class",tokens(0))
     check_token("whitespace"," ",tokens(1))
@@ -48,12 +48,12 @@ class TokenizerSpec extends PapaCarloUnitSpec {
     check_token("identifier","bits",tokens(9))
     check_token(";",";",tokens(10))
     check_token("}","}",tokens(11))
-  }  
+  }
 
   it should "parse a method definition" in {
     val code = "class A {void foo(int a){return 1+2;}}"
     val lexer = JavaIP.tokenizer
-    val tokens = lexer.tokenize(code)  
+    val tokens = lexer.tokenize(code)
     assert(22==tokens.length)
     check_token("class","class",tokens(0))
     check_token("whitespace"," ",tokens(1))
@@ -81,12 +81,12 @@ class TokenizerSpec extends PapaCarloUnitSpec {
 
   // TODO next two tests are related to https://groups.google.com/forum/#!topic/papa-carlo/cTcQY3RbtYA
 
-  /*it should "parse annidated line comments inside method" in {
+ /* it should "parse annidated line comments inside method" in {
     val code = "class Animator {\n\n    void run() {\n            //this.getToolkit().sync();  // Force it to be drawn *now*.\n    }\n}"
     val lexer = JavaIP.tokenizer
     val tokens = lexer.tokenize(code).filterNot(node => node.kind=="whitespace" || node.kind=="comment")
-    //println("Number of tokens: "+tokens.length)
-    //tokens.foreach(t => println("* "+t.kind+", '"+t.value+"'"))
+    println("Number of tokens: "+tokens.length)
+    tokens.foreach(t => println("* "+t.kind+", '"+t.value+"'"))
     assert(10==tokens.length)
   }
 
@@ -137,8 +137,8 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse import directives" in {
     val code = "import java.applet.*;\n" +
-               "import java.awt.*;\n"+
-               "class A { }"
+      "import java.awt.*;\n"+
+      "class A { }"
     val lexer = JavaIP.lexer
     val syntax = JavaIP.syntax(lexer)
     var classes = Map[String,Node]()
@@ -263,47 +263,47 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertQualId(List("D"),i2)
   }
 
- it should "parse a field declaration with initializer" in {
-    var m = parseAndGetField("int foo = 1;")
+  it should "parse a field declaration with initializer" in {
+    val m = parseAndGetField("int foo = 1;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
     assertIsIntegerLiteral(1,getBranch(m,"initializationValue"))
   }
 
   it should "parse sum expression" in {
-    var m = parseAndGetField("int foo = 1+2;")
+    val m = parseAndGetField("int foo = 1+2;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("+",Map[String,String](),toExpOp(getBranch(m,"initializationValue")))
-    assertIsIntegerLiteral(1,getBranch(toExpOp(getBranch(m,"initializationValue")),"left"))
-    assertIsIntegerLiteral(2,getBranch(toExpOp(getBranch(m,"initializationValue")),"right"))
+    assertNodeIs("+",Map[String,String](),getBranch(m,"initializationValue"))
+    assertIsIntegerLiteral(1,getBranch(getBranch(m,"initializationValue"),"left"))
+    assertIsIntegerLiteral(2,getBranch(getBranch(m,"initializationValue"),"right"))
   }
 
   it should "parse subtraction expression" in {
     val m = parseAndGetField("int foo = 1-2;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("-",Map[String,String](),toExpOp(getBranch(m,"initializationValue")))
-    assertIsIntegerLiteral(1,getBranch(toExpOp(getBranch(m,"initializationValue")),"left"))
-    assertIsIntegerLiteral(2,getBranch(toExpOp(getBranch(m,"initializationValue")),"right"))
+    assertNodeIs("-",Map[String,String](),getBranch(m,"initializationValue"))
+    assertIsIntegerLiteral(1,getBranch(getBranch(m,"initializationValue"),"left"))
+    assertIsIntegerLiteral(2,getBranch(getBranch(m,"initializationValue"),"right"))
   }
 
   it should "parse multiplication expression" in {
     val m = parseAndGetField("int foo = 1*2;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("*",Map[String,String](),toExpOp(getBranch(m,"initializationValue")))
-    assertIsIntegerLiteral(1,getBranch(toExpOp(getBranch(m,"initializationValue")),"left"))
-    assertIsIntegerLiteral(2,getBranch(toExpOp(getBranch(m,"initializationValue")),"right"))
+    assertNodeIs("*",Map[String,String](),getBranch(m,"initializationValue"))
+    assertIsIntegerLiteral(1,getBranch(getBranch(m,"initializationValue"),"left"))
+    assertIsIntegerLiteral(2,getBranch(getBranch(m,"initializationValue"),"right"))
   }
 
   it should "parse division expression" in {
     val m = parseAndGetField("int foo = 1/2;")
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("/",Map[String,String](),toExpOp(getBranch(m,"initializationValue")))
-    assertIsIntegerLiteral(1,getBranch(toExpOp(getBranch(m,"initializationValue")),"left"))
-    assertIsIntegerLiteral(2,getBranch(toExpOp(getBranch(m,"initializationValue")),"right"))
+    assertNodeIs("/",Map[String,String](),getBranch(m,"initializationValue"))
+    assertIsIntegerLiteral(1,getBranch(getBranch(m,"initializationValue"),"left"))
+    assertIsIntegerLiteral(2,getBranch(getBranch(m,"initializationValue"),"right"))
   }
 
   it should "parse variable reference expression" in {
@@ -318,7 +318,7 @@ class ParserSpec extends PapaCarloUnitSpec {
     assert("foo"==getValue(m,"name"))
     assertIsPrimitive("int",getBranch(m,"type"))
     assertNodeIs("expAccess",Map[String,String]("fieldName"->"a"),getBranch(m,"initializationValue"),"Initialization value expected to be expAccess")
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(simplify(getBranch(m,"initializationValue")),"value"))
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"value"))
   }
 
   it should "parse abstract class" in {
@@ -348,7 +348,7 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse function call with args" in {
     val m = parseAndGetField("int foo = baz(1,2);")
-    val v = simplify(getBranch(m,"initializationValue"))
+    val v = getBranch(m,"initializationValue")
     assertNodeIs("expMethodCall",Map[String,String]("name"->"baz"),v)
     assert(2==getBranches(v,"actualParams").size)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranches(v,"actualParams").head)
@@ -369,7 +369,7 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse instantiation of qualified class name with args" in {
     val m = parseAndGetField("int foo = new fooz.Baz(1,2);")
-    val v = simplify(getBranch(m,"initializationValue"))
+    val v = getBranch(m,"initializationValue")
     assertNodeIs("instantiation",Map[String,String](),v)
     val ci = getBranch(v,"classInst")
     assertNodeIs("classInstantiation",Map[String,String](),ci)
@@ -411,32 +411,32 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse comparison" in {
-    var e = simplify(parseExpr("1==2"))
+    var e = parseExpr("1==2")
     assertNodeIs("==",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = simplify(parseExpr("1!=2"))
+    e = parseExpr("1!=2")
     assertNodeIs("!=",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = simplify(parseExpr("1<2"))
+    e = parseExpr("1<2")
     assertNodeIs("<",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = simplify(parseExpr("1>2"))
+    e = parseExpr("1>2")
     assertNodeIs(">",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = simplify(parseExpr("1<=2"))
+    e = parseExpr("1<=2")
     assertNodeIs("<=",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
 
-    e = simplify(parseExpr("1>=2"))
+    e = parseExpr("1>=2")
     assertNodeIs(">=",Map[String,String](),e)
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(e,"left"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranch(e,"right"))
