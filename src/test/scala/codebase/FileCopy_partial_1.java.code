@@ -22,7 +22,7 @@ public class FileCopy {
   }
 
   public static void copy(String from_name, String to_name) throws IOException {
-    /*File from_file = new File(from_name);  // Get File objects from Strings
+    File from_file = new File(from_name);  // Get File objects from Strings
     File to_file = new File(to_name);
 
     // First make sure the source file exists, is a file, and is readable.
@@ -73,7 +73,7 @@ public class FileCopy {
     // So we copy the file, a buffer of bytes at a time.
     FileInputStream from = null;  // Stream to read from source
     FileOutputStream to = null;   // Stream to write to destination
-    try {
+    /*try {
       from = new FileInputStream(from_file);  // Create input stream
       to = new FileOutputStream(to_file);     // Create output stream
       byte[] buffer = new byte[4096];         // A buffer to hold file contents

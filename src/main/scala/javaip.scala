@@ -721,21 +721,28 @@ object JavaIP {
         token("{"),
         zeroOrMore(statement),
         recover(token("}"),"closing bracket expected"),
-        token("catch"),
-        token("("),
-        qualifiedIdentifier,
-        token("identifier"),
-        recover(token(")"),"closing parenthesis expected"),
-        token("{"),
-        zeroOrMore(statement),
-        recover(token("}"),"Missing }"),
-        optional(sequence(
-          token("finally"),
-          token("{"),
-          zeroOrMore(statement),
-          token("}")
+        choice(
+          sequence(
+            token("catch"),
+            token("("),
+            qualifiedIdentifier,
+            token("identifier"),
+            recover(token(")"),"closing parenthesis expected"),
+            token("{"),
+            zeroOrMore(statement),
+            recover(token("}"),"Missing }"),
+            optional(sequence(
+              token("finally"),
+              token("{"),
+              zeroOrMore(statement),
+              token("}")
+            ))),
+          sequence(
+            token("finally"),
+            token("{"),
+            zeroOrMore(statement),
+            token("}"))
         ))
-      )
     }
 
     val throwStmt = rule("throwStmt") {
