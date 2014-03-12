@@ -363,11 +363,7 @@ object JavaIP {
     val classType : NamedRule = rule("classType") {
       sequence(
          capture("name",token("identifier")),
-         optional(sequence(
-          token("<"),
-          zeroOrMore(typeUsage,separator=token(",")),
-          token(">")
-         ))
+         optional(branch("genericParams",genericParams))
       )
     }
 
@@ -387,6 +383,14 @@ object JavaIP {
       sequence(
         token("["),
         token("]")
+      )
+    }
+
+    val genericParams : NamedRule = rule("genericParams"){
+      sequence(
+        token("<"),
+        zeroOrMore(branch("params",typeUsage),separator = token(",")),
+        token(">")
       )
     }
 
@@ -686,10 +690,10 @@ object JavaIP {
 
     val statement : NamedRule = subrule("statement") {
       choice(
+        localVarDecl,
         expressionStatement,
         assignment,
         returnStmt,
-        localVarDecl,
         blockStmt,
         ifStmt,
         tryStmt,

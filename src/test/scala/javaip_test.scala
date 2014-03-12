@@ -427,4 +427,13 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("!",Map[String,String](),notExp)
     assertIsIntegerLiteral(1,getBranch(notExp,"operand"))
   }
+
+  it should "parse usage of generic type" in {
+    var stmt = parseStmt("List<String> l;");
+    assertNodeIs("localVarDecl",Map[String,String]("name"->"l"),stmt)
+    assertNodeIs("typeUsage",Map[String,String](),getBranch(stmt,"type"))
+    assertNodeIs("classType",Map[String,String]("name"->"List"),getBranch(getBranch(stmt,"type"),"baseType"))
+    val genericParams = getBranch(getBranch(getBranch(stmt,"type"),"baseType"),"genericParams")
+    assertNodeIs("classType",Map[String,String]("name"->"String"),getBranch(getBranch(genericParams,"params"),"baseType"))
+  }
 }
