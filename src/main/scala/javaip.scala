@@ -499,6 +499,10 @@ object JavaIP {
           separator = token(",")
         ),
         recover(token(")"),"Missing closing parenthesis"),
+        optional(sequence(
+          token("throws"),
+          oneOrMore(branch("exceptionsThrown",qualifiedIdentifier),separator = token(","))
+        )),
         choice(
           capture("abstractBody",token(";")),
           sequence(

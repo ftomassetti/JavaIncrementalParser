@@ -474,4 +474,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertIsMethodCall("c",ch2)
   }
 
+  it should "parse method decl with throws clause" in {
+    val m = parseAndGetMethod("void foo() throws MyException {}")
+    assert("foo"==getValue(m,"name"))
+    assert("voidType"==getBranch(m,"returnType").getKind)
+    assert(1==m.getBranches("exceptionsThrown").size)
+    assertQualId(List[String]("MyException"),getBranch(m,"exceptionsThrown"))
+  }
+
 }
