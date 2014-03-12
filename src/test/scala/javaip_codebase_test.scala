@@ -67,4 +67,16 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("AbstactWekaProgrammingLanguageTokenizer")
   }
 
+  it should "parse FileCopy.java.code" in {
+    parseWithoutErrors("FileCopy")
+  }
+
+  it should "parse Mud.java.code" in {
+    parseWithoutErrors("Mud")
+  }
+
+  it should "parse Soundmap.java.code" in {
+    parseWithoutErrors("Soundmap")
+  }
+
 }
