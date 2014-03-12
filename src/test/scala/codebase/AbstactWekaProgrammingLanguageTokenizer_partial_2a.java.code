@@ -1,0 +1,29 @@
+package it.polito.clj.languagespotter;
+
+import weka.core.tokenizers.WordTokenizer;
+
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Adapter from GenericProgrammingLanguageTokenizer to WordTokenizer.
+ */
+abstract class AbstactWekaProgrammingLanguageTokenizer extends WordTokenizer {
+
+    private List<Token> tokens = null;
+    private int indexOfNextElement = -1;
+
+    @Override
+    public boolean hasMoreElements() {
+        return tokens!=null&&indexOfNextElement<tokens.size();
+    }
+
+    @Override
+    public Object nextElement() {
+        if (!hasMoreElements()){
+        }
+    }
+
+
+
+}

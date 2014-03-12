@@ -414,4 +414,17 @@ class ParserSpec extends PapaCarloUnitSpec {
     var root = parseAndGetRoot(code)
   }
 
+  it should "parse package decl" in {
+    var code = "package it.polito;"
+    var root = parseAndGetRoot(code)
+    var packDecl = getBranch(root,"packageDecl")
+    var packName = getBranch(packDecl,"packageName")
+    assertQualId(List[String]("it","polito"),packName)
+  }
+
+  it should "parse not exp" in {
+    var notExp = parseExpr("!1")
+    assertNodeIs("!",Map[String,String](),notExp)
+    assertIsIntegerLiteral(1,getBranch(notExp,"operand"))
+  }
 }

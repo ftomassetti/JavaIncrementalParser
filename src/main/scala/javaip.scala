@@ -92,6 +92,7 @@ object JavaIP {
       "&&","||",
       "+=","-=","*=","/=",
       "==","!=","<=",">=","<",">",
+      "!",
       "=","&","|","[","]",
       "//","/*","*/")
 
@@ -108,7 +109,8 @@ object JavaIP {
       "extends","implements","throws",
       "try", "catch","finally",
       "this",
-      "new"
+      "new",
+      "package"
     )
 
     tokenizer
@@ -286,6 +288,7 @@ object JavaIP {
       postfix(rule,"--",1)
       prefix(rule,"++",1)
       prefix(rule,"--",1)
+      prefix(rule,"!",1)
       postfix(rule, "%", 1)
       prefix(rule, "+", 2)
       prefix(rule, "-", 2)
@@ -533,8 +536,17 @@ object JavaIP {
       )
     }
 
+    val packageDecl = rule("packageDecl") {
+      sequence(
+        token("package"),
+        branch("packageName",qualifiedIdentifier),
+        token(";")
+      )
+    }
+
     val compilationUnit = rule("compilationUnit").main {
       sequence(
+        optional(branch("packageDecl",packageDecl)),
         branch("imports",zeroOrMore(importDir)),
         zeroOrMore(branch("classDeclaration",javaClass))
       )
