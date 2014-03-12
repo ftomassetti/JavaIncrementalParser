@@ -218,11 +218,18 @@ object JavaIP {
       )
     }
 
-    val paren = rule("paren"){
+    val paren = rule("paren").transform { orig =>
+      if (orig.getBranches contains "castedExp"){
+        orig.accessor.setKind("castExp").node
+      } else {
+        orig
+      }
+    }{
       sequence(
         token("("),
-        capture("value",exp),
-        token(")")
+        capture("value",choice(exp,typeUsage)),
+        token(")"),
+        optional(branch("castedExp",exp))
       )
     }
 
@@ -277,17 +284,8 @@ object JavaIP {
         optional(branch("invocation",invocation)))
     }
 
-    val castExp = rule("castExp"){
-      sequence(
-        token("("),
-        branch("targetType",qualifiedIdentifier),
-        token(")"),
-        capture("castedValue",exp)
-      )
-    }
-
     val expOpElement = subrule("expOpElement"){
-      choice(expMethodCall,castExp,expAccess)
+      choice(expMethodCall,expAccess)
     }
 
     val expOp : NamedRule = rule("expression") {

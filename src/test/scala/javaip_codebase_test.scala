@@ -52,80 +52,35 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
   }
 
   it should "parse Scribble.java partial 1" in {
-    val filename = "src/test/scala/codebase/Scribble_partial_1.java.code"
-    val code = scala.io.Source.fromFile(filename).mkString
-
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    val m = new ErrorMonitor(lexer,syntax)
-    lexer.input(code)
-    assert(0==syntax.getErrors.size)
+    parseWithoutErrors("Scribble_partial_1")
   }
 
   it should "parse Scribble.java partial 2" in {
-    val filename = "src/test/scala/codebase/Scribble_partial_2.java.code"
-    val code = scala.io.Source.fromFile(filename).mkString
-
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    val m = new ErrorMonitor(lexer,syntax)
-    lexer.input(code)
-    assert(0==syntax.getErrors.size)
+    parseWithoutErrors("Scribble_partial_2")
   }
 
   it should "parse Scribble.java partial 3a" in {
-    val filename = "src/test/scala/codebase/Scribble_partial_3a.java.code"
-    val code = scala.io.Source.fromFile(filename).mkString
-
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    val m = new ErrorMonitor(lexer,syntax)
-    lexer.input(code)
-    assert(0==syntax.getErrors.size,m.getResult)
+    parseWithoutErrors("Scribble_partial_3a")
   }
 
   it should "parse Scribble.java partial 3b" in {
-    val filename = "src/test/scala/codebase/Scribble_partial_3b.java.code"
-    val code = scala.io.Source.fromFile(filename).mkString
-
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    val m = new ErrorMonitor(lexer,syntax)
-    lexer.input(code)
-    assert(0==syntax.getErrors.size,m.getResult)
+    parseWithoutErrors("Scribble_partial_3b")
   }
 
   it should "parse Scribble.java partial 3" in {
-    val filename = "src/test/scala/codebase/Scribble_partial_3.java.code"
-    val code = scala.io.Source.fromFile(filename).mkString
-
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    val m = new ErrorMonitor(lexer,syntax)
-    lexer.input(code)
-    assert(0==syntax.getErrors.size,m.getResult)
+    parseWithoutErrors("Scribble_partial_3")
   }
 
   it should "parse Scribble.java partial 4" in {
-    val filename = "src/test/scala/codebase/Scribble_partial_4.java.code"
-    val code = scala.io.Source.fromFile(filename).mkString
-
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    val m = new ErrorMonitor(lexer,syntax)
-    lexer.input(code)
-    assert(0==syntax.getErrors.size,m.getResult)
+    parseWithoutErrors("Scribble_partial_4")
   }
 
   it should "parse Scribble.java partial 5" in {
-    val filename = "src/test/scala/codebase/Scribble_partial_5.java.code"
-    val code = scala.io.Source.fromFile(filename).mkString
+    parseWithoutErrors("Scribble_partial_5")
+  }
 
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    val m = new ErrorMonitor(lexer,syntax)
-    lexer.input(code)
-    assert(0==syntax.getErrors.size,m.getResult)
+  it should "parse Scribble.java partial 6" in {
+    parseWithoutErrors("Scribble_partial_6")
   }
 
   /*it should "parse Scribble.java" in {
