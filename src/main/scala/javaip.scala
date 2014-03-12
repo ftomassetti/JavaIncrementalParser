@@ -201,6 +201,7 @@ object JavaIP {
       sequence(
         token("new"),
         branch("className",qualifiedIdentifier),
+        optional(branch("genericParams",genericParams)),
         token("("),
         zeroOrMore(branch("actualParams",exp),separator = token(",")),
         token(")")

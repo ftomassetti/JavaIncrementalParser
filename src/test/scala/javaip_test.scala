@@ -446,7 +446,16 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "foreach stmt" in {
     var stmt = parseStmt("for (int i : arr) {}")
-    println(stmt.prettyPrint())
+    assertNodeIs("forEachStmt",Map[String,String](),stmt)
+    assertNodeIs("simpleLocalVarDecl",Map[String,String]("name"->"i"),getBranch(stmt,"iterator"))
+    assertNodeIs("variableReference",Map[String,String]("name"->"arr"),getBranch(stmt,"collection"))
+  }
+
+  it should "parsing diamon operator in instantiation" in {
+    var exp = parseExpr("new LinkedList<>()")
+    assertNodeIs("instantiation",Map[String,String](),exp)
+    assertNodeIs("classInstantiation",Map[String,String](),getBranch(exp,"classInst"))
+    assertNodeIs("genericParams",Map[String,String](),getBranch(getBranch(exp,"classInst"),"genericParams"))
   }
 
 
