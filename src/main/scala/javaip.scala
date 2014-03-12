@@ -613,6 +613,13 @@ object JavaIP {
       )
     }
 
+    val simpleLocalVarDecl = rule("simpleLocalVarDecl") {
+      sequence(
+        branch("type",typeUsage),
+        oneOrMore(capture("name", token("identifier")),separator = token(","))
+      )
+    }
+
     val blockStmt : NamedRule = rule("blockStmt") {
       sequence(
         token("{"),
@@ -646,6 +653,20 @@ object JavaIP {
         optional(exp),
         recover(token(";"),"semicolon missing"),
         optional(exp),
+        recover(token(")"),"closing parenthesis expected"),
+        token("{"),
+        zeroOrMore(statement),
+        recover(token("}"),"Missing }")
+      )
+    }
+
+    val forEachStmt = rule("forEachStmt") {
+      sequence(
+        token("for"),
+        token("("),
+        branch("iterator",simpleLocalVarDecl),
+        token(":"),
+        branch("collection",exp),
         recover(token(")"),"closing parenthesis expected"),
         token("{"),
         zeroOrMore(statement),
@@ -707,6 +728,7 @@ object JavaIP {
         tryStmt,
         whileStmt,
         forStmt,
+        forEachStmt,
         emptyStatement,
         throwStmt
      )

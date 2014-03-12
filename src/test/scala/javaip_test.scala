@@ -444,4 +444,10 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertQualId(List[String]("a"),getBranch(getBranch(stmt,"assigned"),"field"))
   }
 
+  it should "foreach stmt" in {
+    var stmt = parseStmt("for (int i : arr) {}")
+    println(stmt.prettyPrint())
+  }
+
+
 }

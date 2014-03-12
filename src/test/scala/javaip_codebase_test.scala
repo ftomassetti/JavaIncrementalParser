@@ -291,8 +291,8 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("AbstactWekaProgrammingLanguageTokenizer_partial_3a")
   }
 
-  it should "parse AbstactWekaProgrammingLanguageTokenizer.java" in {
+  /*it should "parse AbstactWekaProgrammingLanguageTokenizer.java" in {
     parseWithoutErrors("AbstactWekaProgrammingLanguageTokenizer")
-  }
+  }*/
 
 }
