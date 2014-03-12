@@ -128,16 +128,9 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     assert(0==syntax.getErrors.size,m.getResult)
   }
 
-  it should "parse Scribble.java" in {
-    val filename = "src/test/scala/codebase/Scribble.java.code"
-    val code = scala.io.Source.fromFile(filename).mkString
-
-    val lexer = JavaIP.lexer
-    val syntax = JavaIP.syntax(lexer)
-    val m = new ErrorMonitor(lexer,syntax)
-    lexer.input(code)
-    assert(0==syntax.getErrors.size,m.getResult)
-  }
+  /*it should "parse Scribble.java" in {
+    parseWithoutErrors("Scribble")
+  }*/
 
   it should "parse Animator.java partial 1a" in {
     parseWithoutErrors("Animator_partial_1a")
@@ -267,9 +260,9 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("AllComponents_partial_2")
   }
 
-  it should "parse AllComponents.java" in {
+  /*it should "parse AllComponents.java" in {
     parseWithoutErrors("AllComponents")
-  }
+  }*/
 
   it should "parse AbstactWekaProgrammingLanguageTokenizer partial 1.java" in {
     parseWithoutErrors("AbstactWekaProgrammingLanguageTokenizer_partial_1")

@@ -110,6 +110,11 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
     assert(parts==node.getValues("part").reverse)
   }
 
+  def assertIsMethodCall(methodName:String,node:Node) {
+    assertNodeIs("expMethodCall", Map[String,String](), node)
+    assertNodeIs("variableReference", Map[String,String]("name"->methodName), getBranch(node,"base"))
+  }
+
   def toExpOp(node:Node) : Node = {
     assertNodeIs("expArrayAccess",Map[String,String](),node,"Expected an expArrayAccess(toExpOp method)")
     assert(!hasBranch(node,"index"))

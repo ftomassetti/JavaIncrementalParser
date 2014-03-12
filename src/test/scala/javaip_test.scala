@@ -221,11 +221,10 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse field access expression" in {
-    val m = parseAndGetField("int foo = 1 . a;")
-    assert("foo"==getValue(m,"name"))
-    assertIsPrimitive("int",getBranch(m,"type"))
-    assertNodeIs("expAccess",Map[String,String]("fieldName"->"a"),getBranch(m,"initializationValue"),"Initialization value expected to be expAccess")
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(getBranch(m,"initializationValue"),"value"))
+    val e = parseExpr("a.b")
+    assertNodeIs("chainExp",Map[String,String](),e)
+    assertNodeIs("variableReference",Map[String,String]("name"->"b"),getBranch(e,"chained"))
+    assertNodeIs("variableReference",Map[String,String]("name"->"a"),getBranch(e,"base"))
   }
 
   it should "parse abstract class" in {
@@ -247,19 +246,18 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse function call without args" in {
-    val m = parseAndGetField("int foo = baz();")
-    val v = getBranch(m,"initializationValue")
-    assertNodeIs("expMethodCall",Map[String,String]("name"->"baz"),v)
-    assert(0==getBranches(v,"actualParams").size)
+    val e = parseExpr("baz()")
+    assertNodeIs("expMethodCall",Map[String,String](),e)
+    assertNodeIs("variableReference",Map[String,String]("name"->"baz"),getBranch(e,"base"))
   }
 
   it should "parse function call with args" in {
-    val m = parseAndGetField("int foo = baz(1,2);")
-    val v = getBranch(m,"initializationValue")
-    assertNodeIs("expMethodCall",Map[String,String]("name"->"baz"),v)
-    assert(2==getBranches(v,"actualParams").size)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranches(v,"actualParams").head)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranches(v,"actualParams").tail.head)
+    val e = parseExpr("baz(1,2)")
+    assertNodeIs("expMethodCall",Map[String,String](),e)
+    assertNodeIs("variableReference",Map[String,String]("name"->"baz"),getBranch(e,"base"))
+    assert(2==getBranches(getBranch(e,"invocation"),"actualParams").size)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranches(getBranch(e,"invocation"),"actualParams").head)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),getBranches(getBranch(e,"invocation"),"actualParams").tail.head)
   }
 
   it should "parse string literal" in {
@@ -395,12 +393,20 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse method call on this without params" in {
     var e = parseExpr("this.setBackground()")
-    assertNodeIs("expMethodCall",Map[String,String]("name"->"setBackground"),e)
+    assertNodeIs("chainExp",Map[String,String](),e)
+    assertNodeIs("thisReference",Map[String,String](),getBranch(e,"base"))
+    assertNodeIs("expMethodCall",Map[String,String](),getBranch(e,"chained"))
+    assertNodeIs("variableReference",Map[String,String]("name"->"setBackground"),getBranch(getBranch(e,"chained"),"base"))
   }
 
   it should "parse method call on this with a param" in {
     var e = parseExpr("this.setBackground(Color.white)")
-    assertNodeIs("expMethodCall",Map[String,String]("name"->"setBackground"),e)
+    assertNodeIs("chainExp",Map[String,String](),e)
+    assertNodeIs("thisReference",Map[String,String](),getBranch(e,"base"))
+    assertNodeIs("expMethodCall",Map[String,String](),getBranch(e,"chained"))
+    assertNodeIs("variableReference",Map[String,String]("name"->"setBackground"),getBranch(getBranch(e,"chained"),"base"))
+    var inv = getBranch(getBranch(e,"chained"),"invocation")
+    assert(1==inv.getBranches("actualParams").size)
   }
 
   it should "parse only line comments with open bracket" in {
@@ -458,5 +464,14 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("genericParams",Map[String,String](),getBranch(getBranch(exp,"classInst"),"genericParams"))
   }
 
+  it should "parse chain of calls" in {
+    var exp = parseExpr("a().b().c()")
+    assertNodeIs("chainExp", Map[String,String](), exp)
+    assertIsMethodCall("a",getBranch(exp,"base"))
+    val ch1 = getBranches(exp,"chained").head
+    assertIsMethodCall("b",ch1)
+    val ch2 = getBranches(exp,"chained").tail.head
+    assertIsMethodCall("c",ch2)
+  }
 
 }

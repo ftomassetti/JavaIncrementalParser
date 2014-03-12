@@ -228,17 +228,17 @@ object JavaIP {
 
     val expAtom = subrule("expAtom") {
       choice(
+        thisReference,
         doubleLiteral,
         integerLiteral,
         stringLiteral,
         charLiteral,
         booleanLiteral,
         instantiation,
-        variableReference,
-        thisReference,
         superReference,
         nullReference,
-        paren
+        paren,
+        variableReference
       )
     }
 
@@ -258,14 +258,23 @@ object JavaIP {
       )
     }
 
-    val expMethodCall = rule("expMethodCall") {
+    val invocation = rule("invocation"){
       sequence(
-        optional(
-          sequence(expAtom,token("."))),
-        capture("name",token("identifier")),
         token("("),
         zeroOrMore(branch("actualParams",exp),separator = token(",")),
         token(")"))
+    }
+
+    val expMethodCall = rule("expMethodCall").transform{ orig =>
+      if (orig.getBranches contains "invocation"){
+        orig
+      } else {
+        orig.getBranches("base").head
+      }
+    } {
+      sequence(
+        branch("base",sequence(expAtom)),
+        optional(branch("invocation",invocation)))
     }
 
     val castExp = rule("castExp"){
@@ -338,8 +347,24 @@ object JavaIP {
       )
     }
 
+    val chainExp = rule("chainExp").transform { orig =>
+      if (orig.getBranches contains "chained"){
+        orig
+      } else {
+        orig.getBranches("base").head
+      }
+    } {
+      sequence(
+        branch("base",expArrayAccess),
+        zeroOrMore(sequence(
+          token("."),
+          branch("chained",expArrayAccess)
+        ))
+      )
+    }
+
     val exp : Rule = subrule("expUsage") {
-      expArrayAccess
+       chainExp
     }
 
     // Expressions end
