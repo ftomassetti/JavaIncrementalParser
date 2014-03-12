@@ -556,11 +556,19 @@ object JavaIP {
       )
     }
 
+    val fieldAccess = rule("fieldAccess"){
+      sequence(
+        token("this"),
+        token("."),
+        branch("field",qualifiedIdentifier)
+      )
+    }
+
     // Statements
 
     val assignment = rule("assignment"){
       sequence(
-        branch("assigned",qualifiedIdentifier),
+        branch("assigned",choice(qualifiedIdentifier,fieldAccess)),
         optional(sequence(
           token("["),
           exp,

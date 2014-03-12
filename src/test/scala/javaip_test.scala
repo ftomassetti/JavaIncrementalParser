@@ -436,4 +436,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     val genericParams = getBranch(getBranch(getBranch(stmt,"type"),"baseType"),"genericParams")
     assertNodeIs("classType",Map[String,String]("name"->"String"),getBranch(getBranch(genericParams,"params"),"baseType"))
   }
+
+  it should "field assignment" in {
+    var stmt = parseStmt("this.a = 1;")
+    assertNodeIs("assignment",Map[String,String](),stmt)
+    assertNodeIs("fieldAccess",Map[String,String](),getBranch(stmt,"assigned"))
+    assertQualId(List[String]("a"),getBranch(getBranch(stmt,"assigned"),"field"))
+  }
+
 }
