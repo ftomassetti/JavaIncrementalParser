@@ -517,4 +517,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val c = parseAndGetRoot("class A { class B {} }")
   }
 
+  it should "parse multiple catch clauses" in {
+    val c = parseStmt("try {} catch (A a){} catch(B b){}")
+  }
+
 }
