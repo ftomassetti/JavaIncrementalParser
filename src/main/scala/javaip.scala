@@ -709,9 +709,7 @@ object JavaIP {
         recover(token(";"),"semicolon missing"),
         optional(exp),
         recover(token(")"),"closing parenthesis expected"),
-        token("{"),
-        zeroOrMore(statement),
-        recover(token("}"),"Missing }")
+        branch("body",statement)
       )
     }
 
@@ -723,9 +721,7 @@ object JavaIP {
         token(":"),
         branch("collection",exp),
         recover(token(")"),"closing parenthesis expected"),
-        token("{"),
-        zeroOrMore(statement),
-        recover(token("}"),"Missing }")
+        branch("body",statement)
       )
     }
 
@@ -735,11 +731,20 @@ object JavaIP {
         token("("),
         optional(exp),
         recover(token(")"),"closing parenthesis expected"),
-        //token("{"),
         branch("body",statement)
-        //recover(token("}"),"Missing }"),
-        //optional(token(";"))
       )
+    }
+
+    val catchClause = rule("catchClause"){
+      sequence(
+        token("catch"),
+        token("("),
+        qualifiedIdentifier,
+        token("identifier"),
+        recover(token(")"),"closing parenthesis expected"),
+        token("{"),
+        zeroOrMore(statement),
+        recover(token("}"),"Missing }"))
     }
 
     val tryStmt = rule("tryStmt") {
@@ -750,14 +755,7 @@ object JavaIP {
         recover(token("}"),"closing bracket expected"),
         choice(
           sequence(
-            token("catch"),
-            token("("),
-            qualifiedIdentifier,
-            token("identifier"),
-            recover(token(")"),"closing parenthesis expected"),
-            token("{"),
-            zeroOrMore(statement),
-            recover(token("}"),"Missing }"),
+            oneOrMore(branch("catch",catchClause)),
             optional(sequence(
               token("finally"),
               token("{"),

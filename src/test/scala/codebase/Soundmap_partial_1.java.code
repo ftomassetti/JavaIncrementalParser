@@ -1,0 +1,81 @@
+package codebase;// This example is from _Java Examples in a Nutshell_. (http://www.oreilly.com)
+// Copyright (c) 1997 by David Flanagan
+// This example is provided WITHOUT ANY WARRANTY either expressed or implied.
+// You may study, use, modify, and distribute it for non-commercial purposes.
+// For any commercial use, see http://www.davidflanagan.com/javaexamples
+
+import java.applet.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.net.*;
+import java.util.*;
+
+/**
+ * A Java applet that simulates a client-side imagemap.
+ * Plays a sound whenever the user clicks on one of the hyperlinks.
+ */
+public class Soundmap extends Applet {
+  protected Image image;      // The image to display.
+  protected Vector rects;     // A list of rectangles in it.
+  protected AudioClip sound;  // A sound to play on user clicks in a rectangle.
+
+  /** Initialize the applet */
+  public void init() {
+    // Look up the name of the image, relative to a base URL, and load it.
+    // Note the use of three Applet methods in this one line.
+    image = this.getImage(this.getDocumentBase(), this.getParameter("image"));
+
+    // Lookup and parse a list of rectangular areas and the URLs they map to.
+    // The convenience routine getRectangleParameter() is defined below.
+    rects = new Vector();
+    ImagemapRectangle r;
+    for(int i = 0; (r = getRectangleParameter("rect" + i)) != null; i++)
+      rects.addElement(r);
+
+    // Look up a sound to play when the user clicks one of those areas.
+    sound = this.getAudioClip(this.getDocumentBase(),
+                              this.getParameter("sound"));
+
+    // Specify an "event listener" object to respond to mouse button
+    // presses and releases.  Note that this is the Java 1.1 event model.
+    // Note that it also uses a Java 1.1 inner class, defined below.
+    this.addMouseListener(new Listener());
+  }
+
+  /** Called when the applet is being unloaded from the system.
+   * We use it here to "flush" the image we no longer need. This may
+   * result in memory and other resources being freed more quickly. */
+  public void destroy() { image.flush(); }
+
+  /** To display the applet, we simply draw the image. */
+  public void paint(Graphics g) { g.drawImage(image, 0, 0, this); }
+
+  /** We override this method so that it doesn't clear the background
+   * before calling paint().  No clear is necessary, since paint() overwrites
+   * everything with an image.  Causes less flickering this way. */
+  public void update(Graphics g) { paint(g); }
+
+  /** Parse a comma-separated list of rectangle coordinates and a URL.
+   * Used to read the imagemap rectangle definitions from applet parameters */
+  protected ImagemapRectangle getRectangleParameter(String name) {
+    int x, y, w, h;
+    URL url;
+    String value = this.getParameter(name);
+    if (value == null) return null;
+
+    try {
+      StringTokenizer st = new StringTokenizer(value, ",");
+      x = Integer.parseInt(st.nextToken());
+      y = Integer.parseInt(st.nextToken());
+      w = Integer.parseInt(st.nextToken());
+      h = Integer.parseInt(st.nextToken());
+      url = new URL(this.getDocumentBase(), st.nextToken());
+    }
+    catch (NoSuchElementException e) { return null; }
+    catch (NumberFormatException e) { return null; }
+    catch (MalformedURLException e) { return null; }
+
+    return new ImagemapRectangle(x, y, w, h, url);
+  }
+
+}
