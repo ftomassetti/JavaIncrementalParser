@@ -241,8 +241,22 @@ object JavaIP {
       )
     }
 
+    val assignment = rule("assignment"){
+      sequence(
+        branch("assigned",choice(qualifiedIdentifier,fieldAccess)),
+        optional(sequence(
+          token("["),
+          exp,
+          token("]")
+        )),
+        token("="),
+        branch("value",exp)
+      )
+    }
+
     val expAtom = subrule("expAtom") {
       choice(
+        assignment,
         thisReference,
         doubleLiteral,
         integerLiteral,
@@ -313,6 +327,7 @@ object JavaIP {
       infix(rule, "+", 4)
       infix(rule, "-", 4)
       infix(rule, "==", 5)
+      //infix(rule,"=",8)
       infix(rule, "!=", 5)
       infix(rule, ">=", 5)
       infix(rule, "<=", 5)
@@ -602,20 +617,6 @@ object JavaIP {
 
     // Statements
 
-    val assignment = rule("assignment"){
-      sequence(
-        branch("assigned",choice(qualifiedIdentifier,fieldAccess)),
-        optional(sequence(
-          token("["),
-          exp,
-          token("]")
-        )),
-        token("="),
-        branch("value",exp),
-        recover(token(";"),"semicolon missing")
-      )
-    }
-
     val expressionStatement = rule("expressionStatement"){
       sequence(
         branch("expression",exp),
@@ -764,7 +765,7 @@ object JavaIP {
       choice(
         localVarDecl,
         expressionStatement,
-        assignment,
+        //assignment,
         returnStmt,
         blockStmt,
         ifStmt,

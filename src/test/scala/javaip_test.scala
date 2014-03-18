@@ -283,7 +283,9 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse assignment" in {
-    val s = parseStmt("a.b = 1;")
+    var s = parseStmt("a.b = 1;")
+    assertNodeIs("expressionStatement",Map[String,String](),s);
+    s = getBranch(s,"expression")
     assertNodeIs("assignment",Map[String,String](),s);
     assertQualId(List[String]("a","b"),getBranch(s,"assigned"))
     assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),getBranch(s,"value"))
@@ -441,21 +443,23 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("classType",Map[String,String]("name"->"String"),getBranch(getBranch(genericParams,"params"),"baseType"))
   }
 
-  it should "field assignment" in {
+  it should "parse field assignment" in {
     var stmt = parseStmt("this.a = 1;")
+    assertNodeIs("expressionStatement",Map[String,String](),stmt);
+    stmt = getBranch(stmt,"expression")
     assertNodeIs("assignment",Map[String,String](),stmt)
     assertNodeIs("fieldAccess",Map[String,String](),getBranch(stmt,"assigned"))
     assertQualId(List[String]("a"),getBranch(getBranch(stmt,"assigned"),"field"))
   }
 
-  it should "foreach stmt" in {
+  it should "parse foreach stmt" in {
     var stmt = parseStmt("for (int i : arr) {}")
     assertNodeIs("forEachStmt",Map[String,String](),stmt)
     assertNodeIs("simpleLocalVarDecl",Map[String,String]("name"->"i"),getBranch(stmt,"iterator"))
     assertNodeIs("variableReference",Map[String,String]("name"->"arr"),getBranch(stmt,"collection"))
   }
 
-  it should "parsing diamond operator in instantiation" in {
+  it should "parse diamond operator in instantiation" in {
     var exp = parseExpr("new LinkedList<>()")
     assertNodeIs("classInstantiation",Map[String,String](),exp)
     assertNodeIs("genericParams",Map[String,String](),getBranch(exp,"genericParams"))
@@ -492,6 +496,14 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("arrayInstantiation",Map[String,String]("size"->"101"),e)
     assertNodeIs("primitiveType",Map[String,String]("name"->"byte"),getBranch(e,"typeName"))
   }
+
+  it should "parse expression with assignment" in {
+    val e = parseExpr("bytes_read = from.read(buffer)")
+  }
+
+  /*it should "parse expression with assignment" in {
+    val e = parseExpr("(bytes_read = from.read(buffer)) != -1")
+  }*/
 
 
 }

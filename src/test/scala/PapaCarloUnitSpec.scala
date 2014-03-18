@@ -86,8 +86,8 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
   }
 
   def parseExpr(exprCode : String) : Node = {
-    val s = parseStmt("a = "+exprCode+";")
-    return s.getBranches.get("value").get.head
+    val s = parseStmt(exprCode+";")
+    return s.getBranches.get("expression").get.head
   }
 
   // Helper methods : assert
