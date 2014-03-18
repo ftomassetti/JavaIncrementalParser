@@ -47,7 +47,7 @@ object JavaIP {
       "string",
       sequence(
         chunk("\""),
-        oneOrMore(choice(
+        zeroOrMore(choice(
           anyExceptOf("\n\r\\\""),
           sequence(chunk("\\"), anyExceptOf("\n\r"))
         )),
@@ -280,9 +280,11 @@ object JavaIP {
     } {
       sequence(
         branch("value",expAtom),
-        optional(sequence(
+        zeroOrMore(sequence(
           token("."),
-          capture("fieldName",token("identifier"))
+          choice(
+            capture("fieldName",token("identifier")),
+            capture("this",token("this")))
         ))
       )
     }
@@ -649,7 +651,7 @@ object JavaIP {
     val returnStmt = rule("returnStmt"){
       sequence(
         token("return"),
-        branch("value",exp),
+        optional(branch("value",exp)),
         recover(token(";"),"semicolon missing")
       )
     }
@@ -657,13 +659,15 @@ object JavaIP {
     val localVarDecl = rule("localVarDecl") {
       sequence(
         branch("type",typeUsage),
-        oneOrMore(capture("name", token("identifier")),separator = token(",")),
-        optional(
+        oneOrMore(
           sequence(
-            token("="),
-            branch("initializationValue",exp)
-          )
-        ),
+            capture("name", token("identifier")),
+            optional(
+              sequence(
+                token("="),
+                branch("initializationValue",exp)
+              )
+            )),separator = token(",")),
         recover(token(";"),"semicolon missing")
       )
     }

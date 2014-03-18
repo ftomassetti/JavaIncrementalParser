@@ -3,12 +3,7 @@ package codemodels.incrementalparsers.javaip
 import name.lakhin.eliah.projects.papacarlo.lexis.{Matcher, Tokenizer,
 Contextualizer, Token}
 import name.lakhin.eliah.projects.papacarlo.{Syntax, Lexer}
-import name.lakhin.eliah.projects.papacarlo.syntax.Rule
 import name.lakhin.eliah.projects.papacarlo.syntax.Node
-import name.lakhin.eliah.projects.papacarlo.syntax.rules.NamedRule
-import scala.collection.mutable
-
-import org.scalatest._
 
 class ParserSpec extends PapaCarloUnitSpec {
 
@@ -519,6 +514,30 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse multiple catch clauses" in {
     val c = parseStmt("try {} catch (A a){} catch(B b){}")
+  }
+
+  it should "parsing empty return" in {
+    val c = parseStmt("return;")
+  }
+
+  it should "access container this" in {
+    val e = parseExpr("Applet.this")
+  }
+
+  it should "field access on access container this" in {
+    val e = parseExpr("Applet.this.status")
+  }
+
+  it should "method call on access container this" in {
+    val e = parseExpr("Applet.this.showStatus()")
+  }
+
+  it should "method call on access container this with params" in {
+    val e = parseExpr("Applet.this.showStatus(\"a\")")
+  }
+
+  it should "parse declaration and initialization of multiple variables at once" in {
+    val s = parseStmt("int i, x = e.getX(), y = e.getY();")
   }
 
 }

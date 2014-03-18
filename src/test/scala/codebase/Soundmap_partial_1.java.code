@@ -77,5 +77,65 @@ public class Soundmap extends Applet {
 
     return new ImagemapRectangle(x, y, w, h, url);
   }
+  /**
+   * An instance of this inner class is used to respond to mouse events
+   */
+  class Listener extends MouseAdapter {
+     /** The rectangle that the mouse was pressed in. */
+     private ImagemapRectangle lastrect;
 
-}
+     /** Called when a mouse button is pressed. */
+     public void mousePressed(MouseEvent e) {
+       // On button down, check if we're inside one of the specified rectangles.
+       // If so, highlight the rectangle, display a message, and play a sound.
+       // The utility routine findrect() is defined below.
+       ImagemapRectangle r = findrect(e);
+       if (r == null) return;
+       Graphics g = Applet.this.getGraphics();
+       g.setXORMode(Color.red);
+       g.drawRect(r.x, r.y, r.width, r.height);  // highlight rectangle
+       Applet.this.showStatus("To: " + r.url);   // display URL
+       sound.play();                             // play the sound
+       lastrect = r;   // Remember the rectangle so it can be un-highlighted.
+     }
+
+     /** Called when a mouse button is released. */
+     public void mouseReleased(MouseEvent e) {
+       // When the button is released, unhighlight the rectangle.  If the
+       // mouse is still inside it, ask the browser to go to the URL.
+       if (lastrect != null) {
+         Graphics g = Applet.this.getGraphics();
+         g.setXORMode(Color.red);
+         g.drawRect(lastrect.x, lastrect.y, lastrect.width, lastrect.height);
+         Applet.this.showStatus("");   // Clear the message.
+         ImagemapRectangle r = findrect(e);
+         if ((r != null) && (r == lastrect))  // If still in the same rectangle
+           Applet.this.getAppletContext().showDocument(r.url); // Go to the URL
+         lastrect = null;
+       }
+     }
+
+     /** Find the rectangle we're inside. */
+     protected ImagemapRectangle findrect(MouseEvent e) {
+       //int i, x = e.getX(), y = e.getY();
+       /*for(i = 0; i < rects.size(); i++)  {
+         ImagemapRectangle r = (ImagemapRectangle) rects.elementAt(i);
+         if (r.contains(x, y)) return r;
+       }
+       return null;*/
+     }
+   }
+
+   /**
+    * A helper class.  Just like java.awt.Rectangle, but with a URL field.
+    * Note the use of a nested toplevel class for neatness.
+    */
+
+   static class ImagemapRectangle extends Rectangle {
+     URL url;
+     public ImagemapRectangle(int x, int y, int w, int h, URL url) {
+       super(x, y, w, h);
+       this.url = url;
+     }
+   }
+ }
