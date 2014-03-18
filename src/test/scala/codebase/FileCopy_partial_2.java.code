@@ -83,16 +83,16 @@ public class FileCopy {
       // Note the combination of assignment and comparison in this while
       // loop.  This is a common I/O programming idiom.
       while((bytes_read = from.read(buffer)) != -1) // Read bytes until EOF
-        /*to.write(buffer, 0, bytes_read)*/;            //   write bytes
+        to.write(buffer, 0, bytes_read);            //   write bytes
     }
     // Always close the streams, even if exceptions were thrown
     finally {
-      /*if (from != null) try { from.close(); } catch (IOException e) { ; }
-      if (to != null) try { to.close(); } catch (IOException e) { ; }*/
+      if (from != null) try { from.close(); } catch (IOException e) { ; }
+      if (to != null) try { to.close(); } catch (IOException e) { ; }
     }
   }
 
-  /*private static void abort(String msg) throws IOException {
+  private static void abort(String msg) throws IOException {
     throw new IOException(msg);
-  }*/
+  }
 }

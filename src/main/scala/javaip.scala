@@ -538,11 +538,13 @@ object JavaIP {
       )
     }
 
-    val memberDecl = rule("memberDecl") {
+    val memberDecl :NamedRule = rule("memberDecl") {
       choice(
         branch("constructor",constructorDecl),
         branch("method",methodDecl),
-        branch("field",fieldDecl)
+        branch("field",fieldDecl),
+        branch("class",javaClass),
+        branch("interface",javaInterface)
       )
     }
 
@@ -571,6 +573,22 @@ object JavaIP {
         branch("members",zeroOrMore(memberDecl)),
         //token("}")
         recover(token("}"), "class must end with '}'")
+      )
+    }
+
+    val javaInterface = rule("javaInterface") {
+      sequence(
+        branch("annotations",zeroOrMore(annotationUsage)),
+        branch("qualifiers",zeroOrMore(qualifier)),
+        token("interface"),
+        capture("name", token("identifier")),
+        optional(sequence(
+          token("extends"),
+          oneOrMore(branch("baseClass",qualifiedIdentifier),separator=token(","))
+        )),
+        token("{"),
+        branch("members",zeroOrMore(memberDecl)),
+        recover(token("}"), "interface must end with '}'")
       )
     }
 
@@ -603,7 +621,7 @@ object JavaIP {
       sequence(
         optional(branch("packageDecl",packageDecl)),
         branch("imports",zeroOrMore(importDir)),
-        zeroOrMore(branch("classDeclaration",javaClass))
+        zeroOrMore(branch("classDeclaration",choice(javaInterface,javaClass)))
       )
     }
 
@@ -717,10 +735,10 @@ object JavaIP {
         token("("),
         optional(exp),
         recover(token(")"),"closing parenthesis expected"),
-        token("{"),
-        zeroOrMore(statement),
-        recover(token("}"),"Missing }"),
-        optional(token(";"))
+        //token("{"),
+        branch("body",statement)
+        //recover(token("}"),"Missing }"),
+        //optional(token(";"))
       )
     }
 

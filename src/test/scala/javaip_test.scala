@@ -501,9 +501,20 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("bytes_read = from.read(buffer)")
   }
 
-  /*it should "parse expression with assignment" in {
-    val e = parseExpr("(bytes_read = from.read(buffer)) != -1")
-  }*/
+  it should "parse expression with assignment in parenthesis" in {
+    val e = parseExpr("(bytes_read = from.read(buffer))")
+  }
 
+  it should "parse expression with disequality check" in {
+    val e = parseExpr("(bytes_read = from.read(buffer)) != -1")
+  }
+
+  it should "parse interface" in {
+    val c = parseAndGetRoot("interface A {}")
+  }
+
+  it should "parse annidated classes" in {
+    val c = parseAndGetRoot("class A { class B {} }")
+  }
 
 }
