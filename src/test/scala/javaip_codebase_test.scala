@@ -71,6 +71,10 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("FileCopy_partial_1")
   }
 
+  /*it should "parse FileCopy partial 2.java.code" in {
+    parseWithoutErrors("FileCopy_partial_2")
+  }*/
+
   /*it should "parse FileCopy.java.code" in {
     parseWithoutErrors("FileCopy")
   }*/

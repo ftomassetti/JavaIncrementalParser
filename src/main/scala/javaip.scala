@@ -191,7 +191,13 @@ object JavaIP {
       capture("name",token("identifier"))
     }
 
-    val instantiation = rule("instantiation") {
+    val instantiation = rule("instantiation").transform{ orig =>
+      if (orig.getBranches contains "classInst"){
+        orig.getBranches("classInst").head
+      } else {
+        orig.getBranches("arrayInst").head
+      }
+    } {
       choice(
         branch("classInst",classInstantiation),
         branch("arrayInst",arrayInstantiation))
@@ -200,7 +206,8 @@ object JavaIP {
     val classInstantiation = rule("classInstantiation"){
       sequence(
         token("new"),
-        branch("className",qualifiedIdentifier),
+        choice(branch("className",qualifiedIdentifier),
+          branch("typeName",primitiveType)),
         optional(branch("genericParams",genericParams)),
         token("("),
         zeroOrMore(branch("actualParams",exp),separator = token(",")),
@@ -211,7 +218,8 @@ object JavaIP {
     val arrayInstantiation = rule("arrayInstantiation"){
       sequence(
         token("new"),
-        branch("className",qualifiedIdentifier),
+        choice(branch("className",qualifiedIdentifier),
+          branch("typeName",primitiveType)),
         token("["),
         capture("size",exp),
         token("]")

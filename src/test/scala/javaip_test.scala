@@ -275,13 +275,11 @@ class ParserSpec extends PapaCarloUnitSpec {
   it should "parse instantiation of qualified class name with args" in {
     val m = parseAndGetField("int foo = new fooz.Baz(1,2);")
     val v = getBranch(m,"initializationValue")
-    assertNodeIs("instantiation",Map[String,String](),v)
-    val ci = getBranch(v,"classInst")
-    assertNodeIs("classInstantiation",Map[String,String](),ci)
-    assertQualId(List[String]("fooz","Baz"),getBranch(ci,"className"))
-    assert(2==ci.getBranches("actualParams").size)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),ci.getBranches("actualParams").head)
-    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),ci.getBranches("actualParams").tail.head)
+    assertNodeIs("classInstantiation",Map[String,String](),v)
+    assertQualId(List[String]("fooz","Baz"),getBranch(v,"className"))
+    assert(2==v.getBranches("actualParams").size)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"1"),v.getBranches("actualParams").head)
+    assertNodeIs("integerLiteral",Map[String,String]("value"->"2"),v.getBranches("actualParams").tail.head)
   }
 
   it should "parse assignment" in {
@@ -457,11 +455,10 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertNodeIs("variableReference",Map[String,String]("name"->"arr"),getBranch(stmt,"collection"))
   }
 
-  it should "parsing diamon operator in instantiation" in {
+  it should "parsing diamond operator in instantiation" in {
     var exp = parseExpr("new LinkedList<>()")
-    assertNodeIs("instantiation",Map[String,String](),exp)
-    assertNodeIs("classInstantiation",Map[String,String](),getBranch(exp,"classInst"))
-    assertNodeIs("genericParams",Map[String,String](),getBranch(getBranch(exp,"classInst"),"genericParams"))
+    assertNodeIs("classInstantiation",Map[String,String](),exp)
+    assertNodeIs("genericParams",Map[String,String](),getBranch(exp,"genericParams"))
   }
 
   it should "parse chain of calls" in {
@@ -481,5 +478,20 @@ class ParserSpec extends PapaCarloUnitSpec {
     assert(1==m.getBranches("exceptionsThrown").size)
     assertQualId(List[String]("MyException"),getBranch(m,"exceptionsThrown"))
   }
+
+  it should "parse declaration of array of primitive type" in {
+    val s = parseStmt("byte[] buffer;")
+    assertNodeIs("localVarDecl",Map[String,String]("name"->"buffer"),s)
+    assertNodeIs("typeUsage",Map[String,String](),getBranch(s,"type"))
+    assertNodeIs("primitiveType",Map[String,String]("name"->"byte"),getBranch(getBranch(s,"type"),"baseType"))
+    assertNodeIs("arrayType",Map[String,String](),getBranch(getBranch(s,"type"),"array"))
+  }
+
+  it should "parse instantiation of array of primitive type" in {
+    val e = parseExpr("new byte[101]")
+    assertNodeIs("arrayInstantiation",Map[String,String]("size"->"101"),e)
+    assertNodeIs("primitiveType",Map[String,String]("name"->"byte"),getBranch(e,"typeName"))
+  }
+
 
 }
