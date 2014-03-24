@@ -887,6 +887,16 @@ object JavaIP {
       )
     }
 
+    val synchronizedStmt = rule("synchronizedStmt") {
+      sequence(
+        token("synchronized"),
+        token("("),
+        exp,
+        token(")"),
+        statement
+      )
+    }
+
     val statement : NamedRule = subrule("statement") {
       choice(
         localVarDecl,
@@ -899,6 +909,7 @@ object JavaIP {
         tryStmt,
         whileStmt,
         forStmt,
+        synchronizedStmt,
         forEachStmt,
         emptyStatement,
         throwStmt

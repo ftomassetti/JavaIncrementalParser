@@ -644,4 +644,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val s = parseStmt("try (PrintWriter out = response.getWriter()) { }")
   }
 
+  it should "parse synchronized stmt" in {
+    val s = parseStmt("synchronized (builder) { builder.append(something); }")
+  }
+
 }
