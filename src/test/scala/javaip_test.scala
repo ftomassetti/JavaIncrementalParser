@@ -648,4 +648,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val s = parseStmt("synchronized (builder) { builder.append(something); }")
   }
 
+  it should "parse volatile field" in {
+    val f = parseAndGetMember("volatile StringBuilder builder;")
+  }
+
 }

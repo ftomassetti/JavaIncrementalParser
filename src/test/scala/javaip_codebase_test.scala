@@ -93,6 +93,10 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("TestServlet")
   }
 
+  it should "parse temp.java.code" in {
+    parseWithoutErrors("temp")
+  }
+
   def fetchFiles(path:String)(op:File => Boolean) : Unit = {
     for (file <- new File(path).listFiles if !file.isHidden){
       if (file.getName().endsWith(".java")){

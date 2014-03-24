@@ -117,7 +117,7 @@ object JavaIP {
       "@interface",
       "class","interface",
       "private","protected","public",
-      "static","native","final", "synchronized","abstract",
+      "static","native","final", "synchronized","abstract","volatile",
       "extends","implements","throws",
       "try", "catch","finally",
       "this",
@@ -472,7 +472,8 @@ object JavaIP {
         branch("access", accessQualifier),
         capture("static", token("static")),
         capture("final", token("final")),
-        capture("abstract",token("abstract"))
+        capture("abstract",token("abstract")),
+        capture("volatile",token("volatile"))
       )
     }
 
