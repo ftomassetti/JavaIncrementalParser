@@ -664,4 +664,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     val s = parseStmt("final Long actual = (Long) item;")
   }
 
+  it should "parse not escaped char literal" in {
+    val e = parseExpr("'a'")
+  }
+
+  it should "parse escaped char literal" in {
+    val e = parseExpr("'\\''")
+  }
+
 }

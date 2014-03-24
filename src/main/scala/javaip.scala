@@ -69,7 +69,10 @@ object JavaIP {
       "char",
       sequence(
         chunk("'"),
-        anyExceptOf("'"),
+        choice(
+          sequence(chunk("\\"),any()),
+          anyExceptOf("'")
+        ),
         chunk("'")
       )
     ).mutable
