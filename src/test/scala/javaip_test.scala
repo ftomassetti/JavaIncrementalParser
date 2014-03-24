@@ -624,4 +624,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("(Certificate[]) null")
   }
 
+  it should "parse instanceof exp" in {
+    val e = parseExpr("permission instanceof WebRoleRefPermission")
+  }
+
 }
