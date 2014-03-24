@@ -628,4 +628,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("permission instanceof WebRoleRefPermission")
   }
 
+  it should "parse annotation with named fields" in {
+    val m = parseAndGetMember("@Size(min = 1, max = 20) private String name;")
+  }
+
 }
