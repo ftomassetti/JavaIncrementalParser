@@ -117,12 +117,12 @@ public class Soundmap extends Applet {
 
      /** Find the rectangle we're inside. */
      protected ImagemapRectangle findrect(MouseEvent e) {
-       //int i, x = e.getX(), y = e.getY();
-       /*for(i = 0; i < rects.size(); i++)  {
-         ImagemapRectangle r = (ImagemapRectangle) rects.elementAt(i);
-         if (r.contains(x, y)) return r;
-       }
-       return null;*/
+       int i, x = e.getX(), y = e.getY();
+       //for(i = 0; i < rects.size(); i++)  {
+       //  /*ImagemapRectangle r = (ImagemapRectangle) rects.elementAt(i);
+       //  if (r.contains(x, y)) return r;*/
+       //}
+       return null;
      }
    }
 

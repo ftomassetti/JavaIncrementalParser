@@ -447,6 +447,18 @@ class ParserSpec extends PapaCarloUnitSpec {
     assertQualId(List[String]("a"),getBranch(getBranch(stmt,"assigned"),"field"))
   }
 
+  it should "parse empty for stmt" in {
+    var s = parseStmt("for(;;) {}")
+  }
+
+  it should "parse for stmt with just variable assignment" in {
+    var s = parseStmt("for(i = 0; ; ) {}")
+  }
+
+  it should "parse for stmt" in {
+    var s = parseStmt("for(i = 0; i < rects.size(); i++) {}")
+  }
+
   it should "parse foreach stmt" in {
     var stmt = parseStmt("for (int i : arr) {}")
     assertNodeIs("forEachStmt",Map[String,String](),stmt)
@@ -538,6 +550,10 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse declaration and initialization of multiple variables at once" in {
     val s = parseStmt("int i, x = e.getX(), y = e.getY();")
+  }
+
+  it should "parse postfix inc" in {
+    val e = parseExpr("i++")
   }
 
 }

@@ -706,9 +706,7 @@ object JavaIP {
       sequence(
         token("for"),
         token("("),
-        choice(
-          localVarDecl, // it parses already the semicolon
-          token(";")),
+        branch("init",statement),
         optional(exp),
         recover(token(";"),"semicolon missing"),
         optional(exp),
