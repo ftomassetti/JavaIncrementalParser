@@ -597,7 +597,7 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse annotation on params" in {
-    val m = parseAndGetMethod("public void initialize(@SuppressWarnings>>>(\"rawtypes\") Map options);")
+    val m = parseAndGetMethod("public void initialize(@SuppressWarnings(\"rawtypes\") Map options);")
   }
 
 }

@@ -111,6 +111,6 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
   }
 
   it should "parse javaee7-samples" in {
-    fetchFiles(".")(tryToParse)
+    //fetchFiles(".")(tryToParse)
   }
 }

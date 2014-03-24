@@ -234,7 +234,7 @@ object JavaIP {
             token("["),
             token("]"),
             token("{"),
-            zeroOrMore(branch("item",exp),separator=token(",")),
+            zeroOrMore(exp,separator = token(",")),
             token("}")
           ))
       )
@@ -504,6 +504,7 @@ object JavaIP {
 
     val paramDecl = rule("paramDecl") {
       sequence(
+        zeroOrMore(annotationUsage),
         branch("type",typeUsage),
         capture("name",token("identifier"))
       )
