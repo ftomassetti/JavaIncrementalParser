@@ -1,9 +1,0 @@
-class Animator {
-
-    void run() {
-            //if (++current_image >= images.length) current_image = 0;
-            //this.getGraphics().drawImage(images[current_image], 0, 0, this);
-            //this.getToolkit().sync();
-            //try { Thread.sleep(200); } catch (InterruptedException e) { ; }
-    }
-}
