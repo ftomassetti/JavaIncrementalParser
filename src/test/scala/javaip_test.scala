@@ -577,11 +577,15 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse generic capture" in {
-    val r = parseAndGetMethod("public static Archive<?> deploy(){}");
+    val r = parseAndGetMethod("public static Archive<?> deploy(){}")
   }
 
   it should "parse generic capture with clause" in {
-    val r = parseAndGetMethod("public static Archive<? extends A> deploy(){}");
+    val r = parseAndGetMethod("public static Archive<? extends A> deploy(){}")
+  }
+
+  it should "parse class access" in {
+    val e = parseExpr("A.class")
   }
 
 }

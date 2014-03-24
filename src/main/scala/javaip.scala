@@ -174,6 +174,10 @@ object JavaIP {
       token("this")
     }
 
+    val classReference = rule("classReference") {
+      token("class")
+    }
+
     val superReference = rule("superReference") {
       sequence(
         token("super"),
@@ -267,6 +271,7 @@ object JavaIP {
         arrayInit,
         assignment,
         thisReference,
+        classReference,
         doubleLiteral,
         integerLiteral,
         stringLiteral,
@@ -292,8 +297,7 @@ object JavaIP {
         zeroOrMore(sequence(
           token("."),
           choice(
-            capture("fieldName",token("identifier")),
-            capture("this",token("this")))
+            capture("fieldName",token("identifier")))
         ))
       )
     }
