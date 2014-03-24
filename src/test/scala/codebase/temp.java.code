@@ -24,13 +24,13 @@ import static org.hamcrest.Matchers.*;
 @RunWith(Arquillian.class)
 public class TimerSessionBeanTest {
 
-    /*final static long TIMEOUT = 5000l;
+    final static long TIMEOUT = 5000l;
     final static long TOLERANCE = 1000l;
 
     @Inject
     PingsListener pings;
 
-    @Deployment
+    /*@Deployment
     public static WebArchive deploy() {
         File[] jars = Maven.resolver().loadPomFromFile("pom.xml")
                 .resolve("com.jayway.awaitility:awaitility")
