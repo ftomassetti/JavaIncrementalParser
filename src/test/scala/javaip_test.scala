@@ -596,4 +596,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("new Class[] { HttpServletRequest.class, HttpServletResponse.class }")
   }
 
+  it should "parse annotation on params" in {
+    val m = parseAndGetMethod("public void initialize(@SuppressWarnings>>>(\"rawtypes\") Map options);")
+  }
+
 }

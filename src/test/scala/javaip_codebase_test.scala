@@ -101,7 +101,7 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     val syntax = JavaIP.syntax(lexer)
     val m = new ErrorMonitor(lexer,syntax)
     lexer.input(code)
-   assert(0==syntax.getErrors.size,"Failure on "+f.getName+": "+m.getResult)
+    assert(0==syntax.getErrors.size,"Failure on "+f.getName+": "+m.getResult)
     if (0==syntax.getErrors.size){
       println("OK "+f.getName)
     } else {
@@ -111,6 +111,6 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
   }
 
   it should "parse javaee7-samples" in {
-    //fetchFiles(".")(tryToParse)
+    fetchFiles(".")(tryToParse)
   }
 }
