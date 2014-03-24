@@ -596,6 +596,10 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("new Class[] { HttpServletRequest.class, HttpServletResponse.class }")
   }
 
+  it should "parse array of callbacks init" in {
+    val e = parseExpr("new Callback[] { new CallerPrincipalCallback(clientSubject, \"test\"), new GroupPrincipalCallback(clientSubject, new String[] { \"architect\" }) }")
+  }
+
   it should "parse annotation on params" in {
     val m = parseAndGetMethod("public void initialize(@SuppressWarnings(\"rawtypes\") Map options);")
   }
