@@ -261,12 +261,24 @@ object JavaIP {
         orig
       }
     }{
-      sequence(
+      choice(
+        sequence(
+          token("("),
+          capture("value",choice(typeUsage)),
+          token(")"),
+          branch("castedExp",exp)),
+        sequence(
+          token("("),
+          capture("value",choice(exp)),
+          token(")")
+        )
+      )
+      /*sequence(
         token("("),
         capture("value",choice(exp,typeUsage)),
         token(")"),
         optional(branch("castedExp",exp))
-      )
+      )*/
     }
 
     val assignment = rule("assignment"){

@@ -612,4 +612,16 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("10L")
   }
 
+  it should "parse null literal" in {
+    val e = parseExpr("null")
+  }
+
+  it should "parse cast null" in {
+    val e = parseExpr("(Certificate) null")
+  }
+
+  it should "parse cast to array" in {
+    val e = parseExpr("(Certificate[]) null")
+  }
+
 }
