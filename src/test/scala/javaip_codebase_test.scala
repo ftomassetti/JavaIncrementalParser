@@ -85,6 +85,10 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     parseWithoutErrors("Learner")
   }
 
+  it should "parse TestServerAuthModule.java.code" in {
+    parseWithoutErrors("TestServerAuthModule")
+  }
+
   def fetchFiles(path:String)(op:File => Unit) : Unit = {
     for (file <- new File(path).listFiles if !file.isHidden){
       if (file.getName().endsWith(".java")){
@@ -101,7 +105,7 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     val syntax = JavaIP.syntax(lexer)
     val m = new ErrorMonitor(lexer,syntax)
     lexer.input(code)
-    assert(0==syntax.getErrors.size,"Failure on "+f.getName+": "+m.getResult)
+    assert(0==syntax.getErrors.size,"Failure on "+f.getCanonicalPath+": "+m.getResult)
     if (0==syntax.getErrors.size){
       println("OK "+f.getName)
     } else {

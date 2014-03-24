@@ -604,4 +604,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val m = parseAndGetMethod("public void initialize(@SuppressWarnings(\"rawtypes\") Map options);")
   }
 
+  it should "parse catch of multiple exceptions" in {
+    val s = parseStmt("try {} catch (IOException | UnsupportedCallbackException e) {}")
+  }
+
 }

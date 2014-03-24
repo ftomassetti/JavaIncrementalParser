@@ -791,7 +791,7 @@ object JavaIP {
       sequence(
         token("catch"),
         token("("),
-        qualifiedIdentifier,
+        oneOrMore(capture("exceptions",qualifiedIdentifier),separator=token("|")),
         token("identifier"),
         recover(token(")"),"closing parenthesis expected"),
         token("{"),
