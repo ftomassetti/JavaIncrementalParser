@@ -122,7 +122,8 @@ object JavaIP {
       "try", "catch","finally",
       "this",
       "new",
-      "package"
+      "package",
+      "instanceof"
     )
 
     tokenizer
@@ -434,8 +435,26 @@ object JavaIP {
       )
     }
 
+    //DA CONSIDERARE
+    val instanceOfExp = rule ("instanceOfExpSuffix").transform { orig =>
+      if (orig.getBranches contains "typeUsage"){
+        orig
+      } else {
+        orig.getBranches("base").head
+      }
+
+    }{
+      sequence(
+        branch("base",chainExp),
+        optional(sequence(
+          token("instanceof"),
+          branch("type",typeUsage)
+        )))
+    }
+
+
     val exp : Rule = subrule("expUsage") {
-       chainExp
+       instanceOfExp
     }
 
     // Expressions end
