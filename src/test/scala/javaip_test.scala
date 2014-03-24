@@ -640,4 +640,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val m = parseAndGetMember("@Size(min = 1, max = 20) private String name;")
   }
 
+  it should "parse try with resource stmt" in {
+    val s = parseStmt("try (PrintWriter out = response.getWriter()) { }")
+  }
+
 }

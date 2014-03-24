@@ -845,6 +845,18 @@ object JavaIP {
         recover(token("}"),"Missing }"))
     }
 
+    val tryWithResourceStmt = rule("tryWithResourceStmt") {
+      sequence(
+        token("try"),
+        token("("),
+        oneOrMore(sequence(typeUsage,token("identifier"),token("="),exp),separator=token(";")),
+        token(")"),
+        token("{"),
+        zeroOrMore(statement),
+        token("}"),
+        zeroOrMore(branch("catch",catchClause)))
+    }
+
     val tryStmt = rule("tryStmt") {
       sequence(
         token("try"),
@@ -883,6 +895,7 @@ object JavaIP {
         blockStmt,
         expressionStatement,
         ifStmt,
+        tryWithResourceStmt,
         tryStmt,
         whileStmt,
         forStmt,
