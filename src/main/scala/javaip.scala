@@ -584,7 +584,7 @@ object JavaIP {
         capture("name",token("annotationName")),
         optional(sequence(
           token("("),
-          oneOrMore(capture("val",choice(sequence(token("identifier"),token("="),exp),exp))),
+          oneOrMore(capture("val",choice(sequence(token("identifier"),token("="),exp),exp)),separator=token(",")),
           token(")")
         ))
       )
