@@ -226,9 +226,17 @@ object JavaIP {
         token("new"),
         choice(branch("className",qualifiedIdentifier),
           branch("typeName",primitiveType)),
-        token("["),
-        capture("size",exp),
-        token("]")
+        choice(sequence(
+            token("["),
+            capture("size",exp),
+            token("]")),
+          sequence(
+            token("["),
+            token("]"),
+            token("{"),
+            zeroOrMore(branch("item",exp),separator=token(",")),
+            token("}")
+          ))
       )
     }
 

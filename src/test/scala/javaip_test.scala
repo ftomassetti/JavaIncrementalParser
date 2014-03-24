@@ -588,6 +588,10 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("A.class")
   }
 
+  it should "parse empty array of class init" in {
+    val e = parseExpr("new Class[] { }")
+  }
+
   it should "parse array of class init" in {
     val e = parseExpr("new Class[] { HttpServletRequest.class, HttpServletResponse.class }")
   }
