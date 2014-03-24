@@ -94,6 +94,7 @@ object JavaIP {
       "==","!=","<=",">=","<",">",
       "!",
       "=","&","|","[","]",
+      "?",
       "//","/*","*/")
 
     keywords(
@@ -103,6 +104,7 @@ object JavaIP {
       "do", "while", "for", "switch", "case", "break", "return", "throw",
       "if","else",
       "import",
+      "@interface",
       "class","interface",
       "private","protected","public",
       "static","native","final", "synchronized","abstract",
@@ -254,8 +256,15 @@ object JavaIP {
       )
     }
 
+    val arrayInit = rule("arrayInit"){
+      sequence(token("{"),
+        zeroOrMore(branch("value",exp),separator=token(",")),
+        token("}"))
+    }
+
     val expAtom = subrule("expAtom") {
       choice(
+        arrayInit,
         assignment,
         thisReference,
         doubleLiteral,
@@ -435,10 +444,20 @@ object JavaIP {
       )
     }
 
+    val genericCapture = rule("genericCapture"){
+      sequence(
+        token("?"),
+        optional(sequence(
+          token("extends"),
+          capture("baseType",typeUsage)
+        ))
+      )
+    }
+
     val genericParams : NamedRule = rule("genericParams"){
       sequence(
         token("<"),
-        zeroOrMore(branch("params",typeUsage),separator = token(",")),
+        zeroOrMore(branch("params",choice(genericCapture,typeUsage)),separator = token(",")),
         token(">")
       )
     }
@@ -503,7 +522,12 @@ object JavaIP {
 
     val annotationUsage = rule("annotationUsage"){
       sequence(
-        capture("name",token("annotationName"))
+        capture("name",token("annotationName")),
+        optional(sequence(
+          token("("),
+          capture("val",exp),
+          token(")")
+        ))
       )
     }
 
@@ -594,9 +618,22 @@ object JavaIP {
       )
     }
 
+    val annotationDecl = rule("annotationDecl") {
+      sequence(
+        branch("annotations",zeroOrMore(annotationUsage)),
+        branch("qualifiers",zeroOrMore(qualifier)),
+        token("@interface"),
+        capture("name", token("identifier")),
+        token("{"),
+        recover(token("}"), "annotation declaration must end with '}'")
+      )
+    }
+
+
     val importDir = rule("importDir") {
       sequence(
         token("import"),
+        optional(capture("static",token("static"))),
         capture("part",token("identifier")),
         zeroOrMore(
           sequence(
@@ -623,7 +660,7 @@ object JavaIP {
       sequence(
         optional(branch("packageDecl",packageDecl)),
         branch("imports",zeroOrMore(importDir)),
-        zeroOrMore(branch("classDeclaration",choice(javaInterface,javaClass)))
+        zeroOrMore(branch("classDeclaration",choice(javaInterface,javaClass,annotationDecl)))
       )
     }
 
@@ -782,10 +819,10 @@ object JavaIP {
     val statement : NamedRule = subrule("statement") {
       choice(
         localVarDecl,
-        expressionStatement,
         //assignment,
         returnStmt,
         blockStmt,
+        expressionStatement,
         ifStmt,
         tryStmt,
         whileStmt,

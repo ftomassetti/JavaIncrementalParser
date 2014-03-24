@@ -556,4 +556,32 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("i++")
   }
 
+  it should "parse annotation decl" in {
+    val r = parseAndGetRoot("public @interface MyInterceptorBinding {}")
+  }
+
+  it should "parse annotation without params on annotation decl" in {
+    val r = parseAndGetRoot("@A public @interface MyInterceptorBinding {}")
+  }
+
+  it should "parse annotation with single param, on annotation decl" in {
+    val r = parseAndGetRoot("@A(a) public @interface MyInterceptorBinding {}")
+  }
+
+  it should "parse annotation with multiple params, on annotation decl" in {
+    val r = parseAndGetRoot("@A({a,b}) public @interface MyInterceptorBinding {}")
+  }
+
+  it should "parse import static" in {
+    val r = parseAndGetRoot("import static java.lang.annotation.ElementType.METHOD;")
+  }
+
+  it should "parse generic capture" in {
+    val r = parseAndGetMethod("public static Archive<?> deploy(){}");
+  }
+
+  it should "parse generic capture with clause" in {
+    val r = parseAndGetMethod("public static Archive<? extends A> deploy(){}");
+  }
+
 }

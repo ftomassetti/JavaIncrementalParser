@@ -2,6 +2,8 @@ import codemodels.incrementalparsers.javaip.{PapaCarloUnitSpec, JavaIP}
 
 import name.lakhin.eliah.projects.papacarlo.syntax.Node
 import name.lakhin.eliah.projects.papacarlo.test.utils.ErrorMonitor
+import scala.collection.JavaConversions._
+import java.io.File
 
 class javaip_codebase_test extends PapaCarloUnitSpec {
 
@@ -81,5 +83,34 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
 
   it should "parse Learner.java.code" in {
     parseWithoutErrors("Learner")
+  }
+
+  def fetchFiles(path:String)(op:File => Unit) : Unit = {
+    for (file <- new File(path).listFiles if !file.isHidden){
+      if (file.getName().endsWith(".java")){
+        op(file)
+      }
+      if (file.isDirectory)
+        fetchFiles(file.getAbsolutePath)(op)
+    }
+  }
+
+  def tryToParse(f:File) : Boolean = {
+    val code : String = scala.io.Source.fromFile(f).mkString
+    val lexer = JavaIP.lexer
+    val syntax = JavaIP.syntax(lexer)
+    val m = new ErrorMonitor(lexer,syntax)
+    lexer.input(code)
+   assert(0==syntax.getErrors.size,"Failure on "+f.getName+": "+m.getResult)
+    if (0==syntax.getErrors.size){
+      println("OK "+f.getName)
+    } else {
+      println("KO "+f.getName)
+    }
+    return 0==syntax.getErrors.size
+  }
+
+  it should "parse javaee7-samples" in {
+    //fetchFiles(".")(tryToParse)
   }
 }
