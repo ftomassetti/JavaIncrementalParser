@@ -660,4 +660,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val m = parseAndGetMethod("void withinWindow(final long timeout);")
   }
 
+  it should "parse final local var decl" in {
+    val s = parseStmt("final Long actual = (Long) item;")
+  }
+
 }

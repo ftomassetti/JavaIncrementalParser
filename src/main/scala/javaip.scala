@@ -761,6 +761,7 @@ object JavaIP {
 
     val localVarDecl = rule("localVarDecl") {
       sequence(
+        optional(capture("final",token("final"))),
         branch("type",typeUsage),
         oneOrMore(
           sequence(
