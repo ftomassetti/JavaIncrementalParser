@@ -36,6 +36,16 @@ object JavaIP {
     )
 
     tokenCategory(
+      "longL",
+      sequence(
+        choice(  // in terms of regexp: 0|([1-9][0-9]*)
+          chunk("0"),
+          sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))
+        ),
+        chunk("L"))
+    )
+
+    tokenCategory(
       "integer",
       choice(  // in terms of regexp: 0|([1-9][0-9]*)
         chunk("0"),
@@ -156,6 +166,10 @@ object JavaIP {
 
     val integerLiteral = rule("integerLiteral") {
       capture("value",token("integer"))
+    }
+
+    val longLiteral = rule("longLiteral") {
+      capture("value",token("longL"))
     }
 
     val stringLiteral = rule("stringLiteral") {
@@ -281,6 +295,7 @@ object JavaIP {
         thisReference,
         classReference,
         doubleLiteral,
+        longLiteral,
         integerLiteral,
         stringLiteral,
         charLiteral,

@@ -77,7 +77,7 @@ public class TestServerAuthModule implements ServerAuthModule {
 
         return SUCCESS;
     }
-/*
+
     @Override
     public Class<?>[] getSupportedMessageTypes() {
         return supportedMessageTypes;
@@ -91,5 +91,5 @@ public class TestServerAuthModule implements ServerAuthModule {
     @Override
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
 
-    }*/
+    }
 }

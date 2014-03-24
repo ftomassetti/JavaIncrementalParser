@@ -608,4 +608,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val s = parseStmt("try {} catch (IOException | UnsupportedCallbackException e) {}")
   }
 
+  it should "parse long literal" in {
+    val e = parseExpr("10L")
+  }
+
 }
