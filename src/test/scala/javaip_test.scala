@@ -652,4 +652,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     val f = parseAndGetMember("volatile StringBuilder builder;")
   }
 
+  it should "parse anonymous class" in {
+    val e = parseExpr("new BaseMatcher<Long>() { void foo(){} }")
+  }
+
+  it should "parse final on formal param" in {
+    val m = parseAndGetMethod("void withinWindow(final long timeout);")
+  }
+
 }

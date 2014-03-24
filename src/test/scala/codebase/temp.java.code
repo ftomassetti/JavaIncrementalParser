@@ -30,7 +30,7 @@ public class TimerSessionBeanTest {
     @Inject
     PingsListener pings;
 
-    /*@Deployment
+    @Deployment
     public static WebArchive deploy() {
         File[] jars = Maven.resolver().loadPomFromFile("pom.xml")
                 .resolve("com.jayway.awaitility:awaitility")
@@ -54,7 +54,7 @@ public class TimerSessionBeanTest {
     }
 
     private Matcher<Long> withinWindow(final long timeout, final long tolerance) {
-            return new BaseMatcher<Long>() {
+            /*return new BaseMatcher<Long>() {
                 @Override
                 public boolean matches(Object item) {
                     final Long actual = (Long) item;
@@ -65,7 +65,7 @@ public class TimerSessionBeanTest {
                 public void describeTo(Description description) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
-            };
-    }*/
+            };*/
+    }
 
 }

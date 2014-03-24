@@ -42,7 +42,7 @@ object JavaIP {
           chunk("0"),
           sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))
         ),
-        chunk("L"))
+        choice(chunk("L"),chunk("l")))
     )
 
     tokenCategory(
@@ -232,7 +232,12 @@ object JavaIP {
         optional(branch("genericParams",genericParams)),
         token("("),
         zeroOrMore(branch("actualParams",exp),separator = token(",")),
-        token(")")
+        token(")"),
+        optional(sequence(
+          token("{"),
+          branch("members",zeroOrMore(memberDecl)),
+          token("}")
+        ))
       )
     }
 
@@ -552,6 +557,7 @@ object JavaIP {
     val paramDecl = rule("paramDecl") {
       sequence(
         zeroOrMore(annotationUsage),
+        optional(capture("final",token("final"))),
         branch("type",typeUsage),
         capture("name",token("identifier"))
       )
@@ -624,7 +630,7 @@ object JavaIP {
       )
     }
 
-    val memberDecl :NamedRule = rule("memberDecl") {
+    val memberDecl : NamedRule = rule("memberDecl") {
       choice(
         branch("constructor",constructorDecl),
         branch("method",methodDecl),
