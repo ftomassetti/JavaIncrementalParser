@@ -11,12 +11,15 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
   def parse(code : String, f : Node => Any) {
     val lexer = JavaIP.lexer
     val syntax = JavaIP.syntax(lexer)
+    val m = new ErrorMonitor(lexer,syntax)
+    try{
     syntax.onNodeMerge.bind {node => {
       f(node)
     }}
-    val m = new ErrorMonitor(lexer,syntax)
     lexer.input(code)
-    assert(0==syntax.getErrors.size,"There are syntax errors: "+m.getResult+". Code parsed '"+code+"'")
+    } finally {
+      assert(0==syntax.getErrors.size,"There are syntax errors: "+m.getResult+". Code parsed '"+code+"'")
+    }
   }
 
   def parseAndGetRoot(code : String) : Node = {
@@ -37,6 +40,9 @@ abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
   def parseAndGetClass(code : String) : Node = {
     var classes = List[Node]()
     parse(code,node => {
+      if (!(node.getBranches contains "classDeclaration")){
+        throw new RuntimeException("The node has not a classDeclaration: "+node.prettyPrint())
+      }
       val classNode = node.getBranches.get("classDeclaration").get.head
       classes ::= classNode
     })

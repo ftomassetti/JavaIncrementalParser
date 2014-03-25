@@ -137,12 +137,18 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse class extends clause" in {
     var c = parseAndGetClass("class A extends B {}")
-    assertQualId(List("B"),getBranch(c,"baseClass"))
+    assertNodeIs("typeUsage",Map[String,String](),getBranch(c,"baseClass"))
+    assertNodeIs("classType",Map[String,String]("name"->"B"),getBranch(getBranch(c,"baseClass"),"baseType"))
   }
 
   it should "parse qualified identifier" in {
     var c = parseAndGetClass("class A extends B.C.D {}")
-    assertQualId(List("B","C","D"),getBranch(c,"baseClass"))
+    assertNodeIs("typeUsage",Map[String,String](),getBranch(c,"baseClass"))
+    assertNodeIs("classType",Map[String,String]("name"->"B"),getBranch(getBranch(c,"baseClass"),"baseType"))
+    c = getBranch(getBranch(getBranch(c,"baseClass"),"baseType"),"member")
+    assertNodeIs("classType",Map[String,String]("name"->"C"),c)
+    c = getBranch(c,"member")
+    assertNodeIs("classType",Map[String,String]("name"->"D"),c)
   }
 
   it should "parse class implements clause" in {
@@ -150,19 +156,24 @@ class ParserSpec extends PapaCarloUnitSpec {
     assert(2==getBranches(c,"interfaces").size)
     val i1 = getBranches(c,"interfaces").head
     val i2 = getBranches(c,"interfaces").tail.head
-    assertQualId(List("C"),i1)
-    assertQualId(List("D"),i2)
+    assertNodeIs("typeUsage",Map[String,String](),i1)
+    assertNodeIs("classType",Map[String,String]("name"->"C"),getBranch(i1,"baseType"))
+    assertNodeIs("typeUsage",Map[String,String](),i1)
+    assertNodeIs("classType",Map[String,String]("name"->"D"),getBranch(i2,"baseType"))
   }
 
   it should "parse class extends and implements clause" in {
     var c = parseAndGetClass("class A extends B implements C, D {}")
     assert(2==getBranches(c,"interfaces").size)
     val bc = getBranch(c,"baseClass")
+    assertNodeIs("typeUsage",Map[String,String](),bc)
+    assertNodeIs("classType",Map[String,String]("name"->"B"),getBranch(bc,"baseType"))
     val i1 = getBranches(c,"interfaces").head
     val i2 = getBranches(c,"interfaces").tail.head
-    assertQualId(List("B"),bc)
-    assertQualId(List("C"),i1)
-    assertQualId(List("D"),i2)
+    assertNodeIs("typeUsage",Map[String,String](),i1)
+    assertNodeIs("classType",Map[String,String]("name"->"C"),getBranch(i1,"baseType"))
+    assertNodeIs("typeUsage",Map[String,String](),i2)
+    assertNodeIs("classType",Map[String,String]("name"->"D"),getBranch(i2,"baseType"))
   }
 
   it should "parse a field declaration with initializer" in {
@@ -698,6 +709,10 @@ class ParserSpec extends PapaCarloUnitSpec {
 
   it should "parse generic parameter for methods" in {
     val m = parseAndGetMethod("public <T> T foo(){}")
+  }
+
+  it should "parse inner class as base class" in {
+    val c = parseAndGetClass("class A extends B.C {}")
   }
 
 }

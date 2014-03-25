@@ -541,6 +541,7 @@ object JavaIP {
     val classType : NamedRule = rule("classType") {
       sequence(
          capture("name",token("identifier")),
+         optional(sequence(token("."),branch("member",classType))),
          optional(branch("genericParams",genericParams))
       )
     }
@@ -569,7 +570,7 @@ object JavaIP {
         token("?"),
         optional(sequence(
           token("extends"),
-          capture("baseType",typeUsage)
+          branch("baseType",typeUsage)
         ))
       )
     }
@@ -711,20 +712,19 @@ object JavaIP {
         capture("name", token("identifier")),
         optional(sequence(
           token("extends"),
-          branch("baseClass",qualifiedIdentifier)
+          branch("baseClass",typeUsage)
         )),
         optional(
           sequence(
             token("implements"),
             oneOrMore(
-              branch("interfaces",qualifiedIdentifier),
+              branch("interfaces",typeUsage),
               separator = token(",")
             )
           )
         ),
         token("{"),
         branch("members",zeroOrMore(memberDecl)),
-        //token("}")
         recover(token("}"), "class must end with '}'")
       )
     }
@@ -737,7 +737,7 @@ object JavaIP {
         capture("name", token("identifier")),
         optional(sequence(
           token("extends"),
-          oneOrMore(branch("baseClass",qualifiedIdentifier),separator=token(","))
+          oneOrMore(branch("baseClass",typeUsage),separator=token(","))
         )),
         token("{"),
         branch("members",zeroOrMore(memberDecl)),
