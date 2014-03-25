@@ -684,4 +684,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val r = parseAndGetClass("@NamedQueries({@NamedQuery(name = \"Employee.findAll\", query = \"SELECT e FROM Employee e\") }) public class Employee {}")
   }
 
+  it should "parse generic params on static calls" in {
+    val e = parseExpr("Collections.<String, String> emptyMap()")
+  }
+
 }

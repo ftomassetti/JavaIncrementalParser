@@ -475,6 +475,7 @@ object JavaIP {
         branch("base",expArrayAccess),
         zeroOrMore(sequence(
           token("."),
+          optional(branch("genericParams",genericParams)),
           branch("chained",expArrayAccess)
         ))
       )
@@ -614,6 +615,10 @@ object JavaIP {
           separator = token(",")
         ),
         recover(token(")"),"Missing closing parenthesis"),
+        optional(sequence(
+          token("throws"),
+          oneOrMore(branch("exceptionsThrown",qualifiedIdentifier),separator = token(","))
+        )),
         choice(
           token(";"),
           sequence(
