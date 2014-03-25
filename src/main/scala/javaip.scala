@@ -144,7 +144,7 @@ object JavaIP {
       "true", "false",
       "null",
       "byte","int", "char", "short", "long", "float", "double", "void",
-      "do", "while", "for", "switch", "case", "break", "return", "throw","continue",
+      "do", "while", "for", "switch", "case", "break", "return", "throw","continue","default",
       "if","else",
       "import",
       "@interface",
@@ -997,8 +997,30 @@ object JavaIP {
       sequence(token("continue"),token(";"))
     }
 
+    val caseClause = rule("caseClause") {
+      sequence(token("case"),branch("label",exp),token(":"),zeroOrMore(branch("statements",statement)))
+    }
+
+    val defaultClause = rule("defaultClause") {
+      sequence(token("default"),token(":"),zeroOrMore(branch("statements",statement)))
+    }
+
+    val switchStmt = rule("switchStmt") {
+      sequence(
+        token("switch"),
+        token("("),
+        branch("value",exp),
+        token(")"),
+        token("{"),
+        zeroOrMore(branch("cases",caseClause)),
+        optional(branch("default",defaultClause)),
+        token("}")
+      )
+    }
+
     val statement : NamedRule = subrule("statement") {
       choice(
+        switchStmt,
         localVarDecl,
         breakStmt,
         continueStmt,
