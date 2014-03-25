@@ -703,13 +703,23 @@ object JavaIP {
       )
     }
 
+    val initializer : NamedRule = rule("initializer") {
+      sequence(
+        optional(token("static")),
+        token("{"),
+        zeroOrMore(branch("statements",statement)),
+        token("}")
+      )
+    }
+
     val memberDecl : NamedRule = rule("memberDecl") {
       choice(
         branch("constructor",constructorDecl),
         branch("method",methodDecl),
         branch("field",fieldDecl),
         branch("class",javaClass),
-        branch("interface",javaInterface)
+        branch("interface",javaInterface),
+        branch("initializer",initializer)
       )
     }
 

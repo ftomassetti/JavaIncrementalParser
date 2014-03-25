@@ -719,4 +719,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     val c = parseAndGetClass("@javax.ws.rs.ApplicationPath class A {}")
   }
 
+  it should "parse instance initializer" in {
+    val m = parseAndGetMember("class A { {foo();} }")
+  }
+
+  it should "parse static initializer" in {
+    val m = parseAndGetMember("class A { static {foo();} }")
+  }
+
 }
