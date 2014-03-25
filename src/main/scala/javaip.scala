@@ -334,6 +334,7 @@ object JavaIP {
     val arrayInit = rule("arrayInit"){
       sequence(token("{"),
         zeroOrMore(branch("value",exp),separator=token(",")),
+        optional(token(",")),
         token("}"))
     }
 
@@ -604,6 +605,7 @@ object JavaIP {
 
     val fieldDecl = rule("fieldDecl") {
       sequence(
+        branch("qualifiers",zeroOrMore(qualifier)),
         branch("annotations",zeroOrMore(annotationUsage)),
         branch("qualifiers",zeroOrMore(qualifier)),
         branch("type",typeUsage),
@@ -886,6 +888,7 @@ object JavaIP {
     val localVarDecl = rule("localVarDecl") {
       sequence(
         optional(capture("final",token("final"))),
+        branch("annotations",zeroOrMore(annotationUsage)),
         branch("type",typeUsage),
         oneOrMore(
           sequence(

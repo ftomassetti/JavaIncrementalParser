@@ -751,4 +751,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val r = parseAndGetRoot("enum RelTypes implements RelationshipType { SPOUSE, BROTHER, SISTER }");
   }
 
+  it should "parse static before annotation on fields" in {
+    val f = parseAndGetField("static @Produces int i;");
+  }
+
 }
