@@ -672,4 +672,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("'\\''")
   }
 
+  it should "parse foreach over final iterator" in {
+    val s = parseStmt("for (final String item : items) {}")
+  }
+
+  it should "parse float literal" in {
+    val e = parseExpr("10f")
+  }
+
 }

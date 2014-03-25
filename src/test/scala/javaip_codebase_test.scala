@@ -107,6 +107,9 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     }
   }
 
+  var oks = 0
+  var kos = 0
+
   def tryToParse(f:File) : Boolean = {
     val code : String = scala.io.Source.fromFile(f).mkString
     val lexer = JavaIP.lexer
@@ -116,9 +119,12 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     assert(0==syntax.getErrors.size,"Failure on "+f.getCanonicalPath+": "+m.getResult)
     if (0==syntax.getErrors.size){
       println("OK "+f.getName)
+      oks+=1
     } else {
       println("KO "+f.getName)
+      kos+=1
     }
+    println("OKS "+oks+", KOS "+kos)
     return 0==syntax.getErrors.size
   }
 

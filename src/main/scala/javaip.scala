@@ -23,6 +23,22 @@ object JavaIP {
       oneOrMore(anyOf(" \t\f\n")) // in terms of regexp: [:space:]+
     ).skip
 
+     // For some reason I managed to parse it only as integerLiteral...
+    tokenCategory(
+      "floatL",
+      sequence(
+        choice(  // in terms of regexp: 0|([1-9][0-9]*)
+          chunk("0"),
+          sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))
+        ),
+        optional(sequence(
+          chunk("."),
+          oneOrMore(rangeOf('0', '9'))
+        )),
+        choice(chunk("f"),chunk("F"))
+      )
+    )
+
     tokenCategory(
       "double",
       sequence(
@@ -47,10 +63,12 @@ object JavaIP {
 
     tokenCategory(
       "integer",
+      sequence(
       choice(  // in terms of regexp: 0|([1-9][0-9]*)
         chunk("0"),
         sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))
-      )
+      ),
+        optional(choice(chunk("f"),chunk("F"))))
     )
 
     tokenCategory(
@@ -168,6 +186,10 @@ object JavaIP {
       capture("value",token("double"))
     }
 
+    val floatLiteral = rule("floatLiteral") {
+      capture("value",token("floatL"))
+    }
+
     val integerLiteral = rule("integerLiteral") {
       capture("value",token("integer"))
     }
@@ -282,12 +304,6 @@ object JavaIP {
           token(")")
         )
       )
-      /*sequence(
-        token("("),
-        capture("value",choice(exp,typeUsage)),
-        token(")"),
-        optional(branch("castedExp",exp))
-      )*/
     }
 
     val assignment = rule("assignment"){
@@ -311,6 +327,7 @@ object JavaIP {
 
     val expAtom = subrule("expAtom") {
       choice(
+        floatLiteral,
         arrayInit,
         assignment,
         thisReference,
@@ -781,6 +798,7 @@ object JavaIP {
 
     val simpleLocalVarDecl = rule("simpleLocalVarDecl") {
       sequence(
+        optional(capture("final",token("final"))),
         branch("type",typeUsage),
         oneOrMore(capture("name", token("identifier")),separator = token(","))
       )
