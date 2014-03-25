@@ -747,4 +747,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val r = parseAndGetRoot("public @interface NotNullAndNonEmptyNames { Class<?>[] groups() default {}; }")
   }
 
+  it should "parse enum" in {
+    val r = parseAndGetRoot("enum RelTypes implements RelationshipType { SPOUSE, BROTHER, SISTER }");
+  }
+
 }

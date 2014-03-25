@@ -61,9 +61,9 @@ import javax.validation.constraints.Size;
 @NotNull(message = "{org.javaee7.jaxrs.resource_validation.cannot_be_null}")
 public @interface NotNullAndNonEmptyNames {
 
-    /*String message() default "{org.javaee7.jaxrs.resource_validation.non_null_non_empty_names}";
+    String message() default "{org.javaee7.jaxrs.resource_validation.non_null_non_empty_names}";
 
     Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};*/
+    Class<? extends Payload>[] payload() default {};
 }

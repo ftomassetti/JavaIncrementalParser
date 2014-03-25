@@ -148,7 +148,7 @@ object JavaIP {
       "if","else",
       "import",
       "@interface",
-      "class","interface",
+      "class","interface","enum",
       "private","protected","public",
       "static","native","final", "synchronized","abstract","volatile",
       "extends","implements","throws",
@@ -715,7 +715,8 @@ object JavaIP {
         branch("field",fieldDecl),
         branch("class",javaClass),
         branch("interface",javaInterface),
-        branch("initializer",initializer)
+        branch("initializer",initializer),
+        branch("enum",enumDecl)
       )
     }
 
@@ -816,11 +817,40 @@ object JavaIP {
       )
     }
 
+    val fieldName = rule("fieldName"){
+      capture("name",token("identifier"))
+    }
+
+    val enumDecl = rule("enumDecl") {
+      sequence(
+        branch("annotations",zeroOrMore(annotationUsage)),
+        branch("qualifiers",zeroOrMore(qualifier)),
+        token("enum"),
+        capture("name", token("identifier")),
+        optional(sequence(
+          token("extends"),
+          branch("baseClass",typeUsage)
+        )),
+        optional(
+          sequence(
+            token("implements"),
+            oneOrMore(
+              branch("interfaces",typeUsage),
+              separator = token(",")
+            )
+          )
+        ),
+        token("{"),
+        oneOrMore(branch("fields",fieldName),separator=token(",")),
+        optional(sequence(token(";"),branch("members",zeroOrMore(memberDecl)))),
+        recover(token("}"), "class must end with '}'"))
+    }
+
     val compilationUnit = rule("compilationUnit").main {
       sequence(
         optional(branch("packageDecl",packageDecl)),
         branch("imports",zeroOrMore(importDir)),
-        zeroOrMore(branch("classDeclaration",choice(javaInterface,javaClass,annotationDecl)))
+        zeroOrMore(branch("classDeclaration",choice(javaInterface,javaClass,annotationDecl,enumDecl)))
       )
     }
 
