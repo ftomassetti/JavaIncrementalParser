@@ -735,4 +735,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val s = parseStmt("continue;")
   }
 
+  it should "parse annotation usage on package" in {
+    val r = parseAndGetRoot("@Vetoed package a.b.c;")
+  }
+
 }

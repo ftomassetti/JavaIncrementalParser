@@ -798,6 +798,7 @@ object JavaIP {
 
     val packageDecl = rule("packageDecl") {
       sequence(
+        branch("annotations",zeroOrMore(annotationUsage)),
         token("package"),
         branch("packageName",qualifiedIdentifier),
         token(";")
