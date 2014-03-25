@@ -688,4 +688,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("Collections.<String, String> emptyMap()")
   }
 
+  it should "parse exceptions decl on constructors" in {
+    val m = parseAndGetMember("Pippo() throws Hi {}")
+  }
+
 }
