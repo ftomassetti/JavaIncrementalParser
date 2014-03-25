@@ -696,4 +696,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("a==b? 1 : 0")
   }
 
+  it should "parse generic parameter for methods" in {
+    val m = parseAndGetMethod("public <T> T foo(){}")
+  }
+
 }

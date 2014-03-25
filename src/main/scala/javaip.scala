@@ -661,6 +661,7 @@ object JavaIP {
       sequence(
         branch("annotations",zeroOrMore(annotationUsage)),
         branch("qualifiers",zeroOrMore(qualifier)),
+        optional(branch("genericParams",genericParams)),
         branch("returnType",
           choice(
             typeUsage,
