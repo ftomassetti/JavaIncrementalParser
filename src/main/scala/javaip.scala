@@ -426,7 +426,7 @@ object JavaIP {
       prefix(rule,"++",1)
       prefix(rule,"--",1)
       prefix(rule,"!",1)
-      postfix(rule, "%", 1)
+      infix(rule, "%", 1)
       prefix(rule, "+", 2)
       prefix(rule, "-", 2)
       infix(rule, "*", 3)
@@ -452,8 +452,15 @@ object JavaIP {
       rule
     }
 
+    val arrayAccessPart = rule("arrayAccessPart"){
+      sequence(token("["),
+        optional(branch("index",exp)),
+        token("]"))
+    }
+
+
     val expArrayAccess = rule("expArrayAccess").transform { orig =>
-      if (orig.getBranches contains  "index"){
+      if (orig.getBranches contains  "arrayAccess"){
        orig
       } else {
         orig.getBranches("value").head
@@ -461,18 +468,7 @@ object JavaIP {
     } {
       sequence(
         branch("value",expOp),
-        optional(sequence(token("["),
-        branch("index",exp),
-        token("]"))))
-    }
-
-    val arrayAccess = rule("arrayAccess"){
-      sequence(
-        branch("array",expOp),
-        token("["),
-        branch("index",exp),
-        token("]")
-      )
+        optional(branch("arrayAccess",arrayAccessPart)))
     }
 
     val chainExp = rule("chainExp").transform { orig =>
@@ -766,6 +762,20 @@ object JavaIP {
       )
     }
 
+    val annotationDeclField = rule("annotationDeclField") {
+      sequence(
+        typeUsage,
+        token("identifier"),
+        token("("),
+        token(")"),
+        optional(sequence(
+          token("default"),
+          exp
+        )),
+        recover(token(";"), "annotation field must end with '}'")
+      )
+    }
+
     val annotationDecl = rule("annotationDecl") {
       sequence(
         branch("annotations",zeroOrMore(annotationUsage)),
@@ -773,6 +783,7 @@ object JavaIP {
         token("@interface"),
         capture("name", token("identifier")),
         token("{"),
+        zeroOrMore(branch("fields",annotationDeclField)),
         recover(token("}"), "annotation declaration must end with '}'")
       )
     }

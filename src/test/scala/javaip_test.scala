@@ -739,4 +739,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     val r = parseAndGetRoot("@Vetoed package a.b.c;")
   }
 
+  it should "parse array class access" in {
+    val e = parseExpr("Person[].class")
+  }
+
+  it should "parse annotation decl field" in {
+    val r = parseAndGetRoot("public @interface NotNullAndNonEmptyNames { Class<?>[] groups() default {}; }")
+  }
+
 }
