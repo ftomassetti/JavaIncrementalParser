@@ -715,4 +715,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val c = parseAndGetClass("class A extends B.C {}")
   }
 
+  it should "parse qualified annotations" in {
+    val c = parseAndGetClass("@javax.ws.rs.ApplicationPath class A {}")
+  }
+
 }

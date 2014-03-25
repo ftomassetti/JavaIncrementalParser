@@ -97,15 +97,26 @@ object JavaIP {
     ).mutable
 
     tokenCategory(
-      "annotationName",sequence(
-        chunk("@"),
-        choice(chunk("_"),rangeOf('a', 'z'),rangeOf('A','Z')),
-        zeroOrMore(
-          choice(
-            chunk("_"),
-            rangeOf('a', 'z'),
-            rangeOf('A','Z'),
-            rangeOf('0', '9'))))
+      "annotationName",
+        sequence(
+          chunk("@"),
+          choice(chunk("_"),rangeOf('a', 'z'),rangeOf('A','Z')),
+          zeroOrMore(
+            choice(
+              chunk("_"),
+              rangeOf('a', 'z'),
+              rangeOf('A','Z'),
+              rangeOf('0', '9'))),
+          zeroOrMore(
+            sequence(
+            chunk("."),choice(chunk("_"),rangeOf('a', 'z'),rangeOf('A','Z')),
+            zeroOrMore(
+              choice(
+                chunk("_"),
+                rangeOf('a', 'z'),
+                rangeOf('A','Z'),
+                rangeOf('0', '9')))))
+        )
     ).mutable
 
     tokenCategory(
