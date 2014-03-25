@@ -680,4 +680,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val e = parseExpr("10f")
   }
 
+  it should "parse annidated annotations" in {
+    val r = parseAndGetClass("@NamedQueries({@NamedQuery(name = \"Employee.findAll\", query = \"SELECT e FROM Employee e\") }) public class Employee {}")
+  }
+
 }

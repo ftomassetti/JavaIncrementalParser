@@ -47,7 +47,8 @@ object JavaIP {
           sequence(rangeOf('1', '9'), zeroOrMore(rangeOf('0', '9')))
         ),
         chunk("."),
-        oneOrMore(rangeOf('0', '9'))
+        oneOrMore(rangeOf('0', '9')),
+        optional(choice(chunk("f"),chunk("F")))
       )
     )
 
@@ -325,8 +326,27 @@ object JavaIP {
         token("}"))
     }
 
+    val namedOrSimpleParam = rule("namedOrSimpleParam"){
+      sequence(
+        optional(sequence(
+          token("identifier"),
+          token("=")
+        )),
+        exp
+      )
+    }
+
+    val annotationInstantiation = rule("annotationInstantiation"){
+      sequence(
+        token("annotationName"),
+        token("("),
+        zeroOrMore(namedOrSimpleParam,separator=token(",")),
+        token(")"))
+    }
+
     val expAtom = subrule("expAtom") {
       choice(
+        annotationInstantiation,
         floatLiteral,
         arrayInit,
         assignment,
