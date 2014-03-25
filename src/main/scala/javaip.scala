@@ -481,14 +481,12 @@ object JavaIP {
       )
     }
 
-    //DA CONSIDERARE
-    val instanceOfExp = rule ("instanceOfExpSuffix").transform { orig =>
+    val instanceOfExp = rule("instanceOfExpSuffix").transform { orig =>
       if (orig.getBranches contains "typeUsage"){
         orig
       } else {
         orig.getBranches("base").head
       }
-
     }{
       sequence(
         branch("base",chainExp),
@@ -498,9 +496,26 @@ object JavaIP {
         )))
     }
 
+    val ifElseExp = rule("ifElseExp").transform { orig =>
+      if (orig.getBranches contains "thenValue"){
+        orig
+      } else {
+        orig.getBranches("base").head
+      }
+    }{
+       sequence(
+         branch("base",instanceOfExp),
+         optional(sequence(
+          token("?"),
+          branch("thenValue",exp),
+          token(":"),
+          branch("elseValue",exp)
+         ))
+       )
+    }
 
     val exp : Rule = subrule("expUsage") {
-       instanceOfExp
+       ifElseExp
     }
 
     // Expressions end

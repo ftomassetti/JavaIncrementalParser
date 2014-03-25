@@ -692,4 +692,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val m = parseAndGetMember("Pippo() throws Hi {}")
   }
 
+  it should "parse if-else operator" in {
+    val e = parseExpr("a==b? 1 : 0")
+  }
+
 }
