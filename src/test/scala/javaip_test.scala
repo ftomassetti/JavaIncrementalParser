@@ -727,4 +727,12 @@ class ParserSpec extends PapaCarloUnitSpec {
     val m = parseAndGetMember("class A { static {foo();} }")
   }
 
+  it should "parse break stmt" in {
+    val s = parseStmt("break;")
+  }
+
+  it should "parse continue stmt" in {
+    val s = parseStmt("continue;")
+  }
+
 }

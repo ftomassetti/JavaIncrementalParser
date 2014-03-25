@@ -144,7 +144,7 @@ object JavaIP {
       "true", "false",
       "null",
       "byte","int", "char", "short", "long", "float", "double", "void",
-      "do", "while", "for", "switch", "case", "break", "return", "throw",
+      "do", "while", "for", "switch", "case", "break", "return", "throw","continue",
       "if","else",
       "import",
       "@interface",
@@ -988,10 +988,19 @@ object JavaIP {
       )
     }
 
+    val breakStmt = rule("breakStmt") {
+      sequence(token("break"),token(";"))
+    }
+
+    val continueStmt = rule("continueStmt") {
+      sequence(token("continue"),token(";"))
+    }
+
     val statement : NamedRule = subrule("statement") {
       choice(
         localVarDecl,
-        //assignment,
+        breakStmt,
+        continueStmt,
         returnStmt,
         blockStmt,
         expressionStatement,
