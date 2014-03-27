@@ -755,4 +755,8 @@ class ParserSpec extends PapaCarloUnitSpec {
     val f = parseAndGetField("static @Produces int i;");
   }
 
+  it should "parse local var array decl with array modifier postfixed" in {
+    val s = parseStmt("byte b[] = new byte[1024];")
+  }
+
 }

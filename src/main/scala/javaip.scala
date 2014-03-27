@@ -786,7 +786,7 @@ object JavaIP {
         token("@interface"),
         capture("name", token("identifier")),
         token("{"),
-        zeroOrMore(branch("fields",annotationDeclField)),
+        zeroOrMore(branch("fields",choice(annotationDeclField,enumDecl))),
         recover(token("}"), "annotation declaration must end with '}'")
       )
     }
@@ -893,6 +893,7 @@ object JavaIP {
         oneOrMore(
           sequence(
             capture("name", token("identifier")),
+            zeroOrMore(sequence(token("["),token("]"))),
             optional(
               sequence(
                 token("="),
@@ -985,7 +986,8 @@ object JavaIP {
       sequence(
         token("try"),
         token("("),
-        oneOrMore(sequence(typeUsage,token("identifier"),token("="),exp),separator=token(";")),
+        oneOrMore(sequence(optional(token("final")),typeUsage,token("identifier"),token("="),exp),separator=token(";")),
+        optional(token(";")),
         token(")"),
         token("{"),
         zeroOrMore(statement),

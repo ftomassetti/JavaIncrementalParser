@@ -118,17 +118,17 @@ class javaip_codebase_test extends PapaCarloUnitSpec {
     lexer.input(code)
     assert(0==syntax.getErrors.size,"Failure on "+f.getCanonicalPath+": "+m.getResult)
     if (0==syntax.getErrors.size){
-      println("OK "+f.getName)
+      //println("OK "+f.getName)
       oks+=1
     } else {
-      println("KO "+f.getName)
+      //println("KO "+f.getName)
       kos+=1
     }
-    println("OKS "+oks+", KOS "+kos)
+    //println("OKS "+oks+", KOS "+kos)
     return 0==syntax.getErrors.size
   }
 
-  it should "parse javaee7-samples" in {
+  it should "parse ALL javaee7-samples" in {
     fetchFiles(".")(tryToParse)
   }
 }
