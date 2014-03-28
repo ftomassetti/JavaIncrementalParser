@@ -10,10 +10,8 @@ class ParserSpec extends PapaCarloUnitSpec {
   // Tests
 
   it should "parse a basic class" in {
-    var classes = parseAndGetClassesList("class A { }")
-
-    assert(1==classes.size)
-    assert("A"==getValue(classes.head,"name"))
+    var c = parseAndGetClass("class A { }")
+    assertNode(c,new ENode("classDeclaration").value("name","A"))
   }
 
   it should "parse a basic class with qualifiers" in {

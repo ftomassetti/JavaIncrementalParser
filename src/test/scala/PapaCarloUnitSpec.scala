@@ -3,10 +3,52 @@ package codemodels.incrementalparsers.javaip
 import name.lakhin.eliah.projects.papacarlo.syntax.Node
 import org.scalatest._
 import name.lakhin.eliah.projects.papacarlo.test.utils.ErrorMonitor
+import scala.collection.mutable
+
+class Diff(reason : String) {
+  override def toString =
+    reason
+}
+
+class ENode(expectedKind : String) {
+  val expectedValues = mutable.Map[String,String]()
+
+  def value(name:String, value:String) : ENode = {
+    expectedValues(name) = value
+    return this
+  }
+
+  def check(actualNode : Node) : mutable.MutableList[Diff] = {
+    val diffs = mutable.MutableList[Diff]()
+    if (!this.expectedKind.equals(actualNode.getKind)){
+      diffs += new Diff("Expected kind "+this.expectedKind+", found kind "+actualNode.getKind)
+    }
+    expectedValues.foreach {case(name, value) =>
+      if (!(actualNode.getValues contains name)){
+        diffs += new Diff("Expected to have value '"+name+"' with value '"+value+"' but it has not that value")
+      } else if (actualNode.getValues.get(name).size!=1){
+        diffs += new Diff("Expected to have value '"+name+"' with value '"+value+"' but it has many values: "+actualNode.getValues.get(name))
+      } else if (!value.equals(actualNode.getValues.get(name).get.head)){
+        diffs += new Diff("Expected to have value '"+name+"' with value '"+value+"' but it has "+actualNode.getValues.get(name).get.head)
+      }
+    }
+    return diffs
+  }
+
+}
 
 abstract class PapaCarloUnitSpec  extends FlatSpec with Matchers with
   OptionValues with Inside with Inspectors {
   // Helper methods : parsing
+
+  def assertNode(actualNode:Node, expectedNode:ENode){
+    val diffs = expectedNode.check(actualNode)
+    if (diffs.size>0){
+      var desc = ""
+      diffs.foreach(diff => desc += " * "+diff)
+      assert(false,desc)
+    }
+  }
 
   def parse(code : String, f : Node => Any) {
     val lexer = JavaIP.lexer

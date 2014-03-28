@@ -715,14 +715,14 @@ object JavaIP {
         branch("constructor",constructorDecl),
         branch("method",methodDecl),
         branch("field",fieldDecl),
-        branch("class",javaClass),
+        branch("class",classDeclaration),
         branch("interface",javaInterface),
         branch("initializer",initializer),
         branch("enum",enumDecl)
       )
     }
 
-    val javaClass = rule("class") {
+    val classDeclaration = rule("classDeclaration") {
       // Consists of three sequential parts: "[" token, series of nested
       // elements separated with "," token, and losing "]" token.
       sequence(
@@ -852,7 +852,7 @@ object JavaIP {
       sequence(
         optional(branch("packageDecl",packageDecl)),
         branch("imports",zeroOrMore(importDir)),
-        zeroOrMore(branch("classDeclaration",choice(javaInterface,javaClass,annotationDecl,enumDecl)))
+        zeroOrMore(branch("classDeclaration",choice(javaInterface,classDeclaration,annotationDecl,enumDecl)))
       )
     }
 
