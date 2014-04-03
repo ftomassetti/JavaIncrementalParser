@@ -536,7 +536,15 @@ object JavaIP {
       ))
     }
 
-    val qualifier = rule("qualifier") {
+    val qualifier = rule("qualifier").transform{ orig =>
+      if (orig.getValues contains "static"){
+        orig.accessor.setKind("staticQualifier")
+        orig.accessor.setConstant("static",null)
+        orig
+      } else {
+        orig
+      }
+    } {
       choice(
         branch("access", accessQualifier),
         capture("static", token("static")),

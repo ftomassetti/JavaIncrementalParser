@@ -15,11 +15,10 @@ class ParserSpec extends PapaCarloUnitSpec {
   }
 
   it should "parse a basic class with qualifiers" in {
-    var classes = parseAndGetClassesMap("public static class A { }")
+    var c = parseAndGetClass("public static class A { }")
 
-    assert(1==classes.size)
-    assert(classes contains "A")
-    val c = classes.get("A").get
+    assertNode(c,new ENode("classDeclaration").value("name","A"))
+    println(c.prettyPrint())
     assert(2==c.getBranches("qualifiers").size)
     assertStaticQualifier(c)
     assertAccessQualifier("public",c)
